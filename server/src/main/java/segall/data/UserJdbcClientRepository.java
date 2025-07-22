@@ -3,7 +3,9 @@ package segall.data;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import segall.models.User;
+@Repository
 
 public class UserJdbcClientRepository implements UserRepository{
     private final JdbcClient jdbcClient;
@@ -37,6 +39,7 @@ public class UserJdbcClientRepository implements UserRepository{
         if(rowsAffected==0){
             return null;
         }
+        user.setId(keyHolder.getKey().intValue());
         return user;
     }
 }

@@ -3,7 +3,7 @@ create database echo;
 use echo;
 
 
-CREATE TABLE IF NOT EXISTS `User` (
+CREATE TABLE IF NOT EXISTS `user` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `username` VARCHAR(255) NOT NULL UNIQUE,
   `password` VARCHAR(255) NOT NULL,
@@ -12,14 +12,16 @@ CREATE TABLE IF NOT EXISTS `User` (
   `city` VARCHAR(255) NOT NULL,
   `state` VARCHAR(255) NOT NULL,
   `zip_code` VARCHAR(20) NOT NULL,
+  `profile_img_url` TEXT,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `instrument` VARCHAR(255),
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS `Band` (
+CREATE TABLE IF NOT EXISTS `band` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
+  `band_img_url` TEXT,
   `genre` VARCHAR(255),
   `bio` TEXT,
   `city` VARCHAR(255),
@@ -129,3 +131,30 @@ CREATE TABLE IF NOT EXISTS `comments` (
     (user_id IS NULL AND band_id IS NOT NULL)
   )
 );
+-- Insert a test user into the User table
+INSERT INTO `user` (
+    username, 
+    password, 
+    first_name, 
+    last_name, 
+    city, 
+    state, 
+    zip_code, 
+    profile_img_url, 
+    email, 
+    instrument
+) VALUES (
+    'testuser123',
+    'password123', 
+    'John',
+    'Doe',
+    'Phoenix',
+    'AZ',
+    '85001',
+    'https://example.com/profile.jpg',
+    'john.doe@example.com',
+    'Guitar'
+);
+
+select * from `user`;
+

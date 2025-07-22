@@ -1,0 +1,16 @@
+@url = http://localhost:8080/api/user
+
+POST {{url}}
+Content-Type: application/json
+
+{
+  "username": "test 1",
+  "password": "password",
+  "email": "test1@gmail.com",
+  "firstName": "Jimmy",
+  "lastName": "Deen",
+  "state": "AZ",
+  "city": "Tucson",
+  "zipCode": "85715",
+  "instrument": "Guitar"
+}
