@@ -7,7 +7,7 @@ Content-Type: application/json
   "username": "test 1",
   "password": "password",
   "email": "test1@gmail.com",
-  "firstName": "Jimmy",
+  "firstName": "",
   "lastName": "Deen",
   "state": "AZ",
   "city": "Tucson",
