@@ -9,7 +9,7 @@ const AppRouter = () => {
     const routes = [
         {
             path: '/',
-            element: <Layout  />,
+            element: <Layout user={user} setUser={setUser} />,
             children:[
                 {
                     path: '',
