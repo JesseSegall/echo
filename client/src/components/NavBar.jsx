@@ -11,7 +11,7 @@ function NavBar() {
                 <Heading size="md">Echo Music</Heading>
                 <Spacer />
                 <Button as={NavLink} to='/signup' variant="outline" colorScheme="white" mr={3}>Sign Up</Button>
-                <Button variant="outline" colorScheme="white">Login</Button>
+                <Button as={NavLink} to='/login' variant="outline" colorScheme="white">Login</Button>
             </Flex>
         </Box>
     );
