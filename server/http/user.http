@@ -14,3 +14,13 @@ Content-Type: application/json
   "zipCode": "85715",
   "instrument": "Guitar"
 }
+
+###
+
+POST {{url}}/authenticate
+Content-Type: application/json
+
+{
+  "email": "test1@gmail.com",
+  "password": "password"
+}

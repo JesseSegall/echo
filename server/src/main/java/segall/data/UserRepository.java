@@ -4,4 +4,5 @@ import segall.models.User;
 
 public interface UserRepository {
     User create(User user);
+    User findByEmail(String email);
 }

@@ -41,4 +41,29 @@ public class UserService {
         return result;
 
     }
+
+    public Result<User> authenticate(String email, String password){
+        Result<User> result = new Result<>();
+
+        User user = repository.findByEmail(email);
+
+        if(user == null){
+            result.addErrorMessage("User not found", ResultType.NOT_FOUND);
+            return result;
+        }
+
+        if(BCrypt.verifyer().verify(password.toCharArray(), user.getPassword()).verified){
+            result.setpayload(user);
+        }else{
+            result.addErrorMessage("Incorrect Password", ResultType.INVALID);
+        }
+
+        return result;
+    }
+
+    public User findByEmail(String email){
+        return repository.findByEmail(email);
+    }
+
+
 }
