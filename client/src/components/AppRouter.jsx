@@ -1,12 +1,15 @@
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import Layout from "./Layout.jsx";
 import SignUpForm from "./SignUpForm.jsx";
+import LoginForm from "./LoginForm.jsx";
+import {useState} from "react";
 
 const AppRouter = () => {
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
     const routes = [
         {
             path: '/',
-            element: <Layout  />,
+            element: <Layout user={user} setUser={setUser} />,
             children:[
                 {
                     path: '',
@@ -15,6 +18,10 @@ const AppRouter = () => {
                 {
                     path: '/signup',
                     element: <SignUpForm/>,
+                },
+                {
+                    path: '/login',
+                    element: <LoginForm setUser={setUser}/>,
                 },
             ]
         }

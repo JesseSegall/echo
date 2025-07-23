@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import segall.data.mappers.UserMapper;
 import segall.models.User;
 @Repository
 
@@ -41,5 +42,16 @@ public class UserJdbcClientRepository implements UserRepository{
         }
         user.setId(keyHolder.getKey().intValue());
         return user;
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        final String sql = """
+                select * from `user` where email = :email;
+                """;
+        return jdbcClient.sql(sql)
+                .param("email", email)
+                .query(User.class)
+                .optional().orElse(null);
     }
 }
