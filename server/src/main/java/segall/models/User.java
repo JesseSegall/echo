@@ -10,6 +10,7 @@ public class User {
     private String password;
     private String email;
 
+    private String bio;
     private String firstName;
     private String lastName;
     private String state;
@@ -18,6 +19,13 @@ public class User {
     private String zipCode;
     private String instrument;
 
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
 
     public int getId() {
         return id;

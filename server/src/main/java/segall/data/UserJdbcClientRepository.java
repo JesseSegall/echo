@@ -18,8 +18,8 @@ public class UserJdbcClientRepository implements UserRepository{
     @Override
     public User create(User user) {
         final String sql = """
-                insert into `user` (username, `password`, first_name, last_name, state, city,profile_img_url, zip_code, email, instrument)
-                values (:username, :password, :first_name, :last_name, :state, :city,:profile_img_url, :zip_code, :email, :instrument);
+                insert into `user` (username, `password`, first_name, last_name, bio, state, city,profile_img_url, zip_code, email, instrument)
+                values (:username, :password, :first_name, :last_name,:bio, :state, :city,:profile_img_url, :zip_code, :email, :instrument);
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -29,6 +29,7 @@ public class UserJdbcClientRepository implements UserRepository{
                 .param("password", user.getPassword())
                 .param("first_name", user.getFirstName())
                 .param("last_name", user.getLastName())
+                .param("bio", user.getBio())
                 .param("state", user.getState())
                 .param("city", user.getCity())
                 .param("profile_img_url", user.getProfileImgUrl())
@@ -53,5 +54,51 @@ public class UserJdbcClientRepository implements UserRepository{
                 .param("email", email)
                 .query(User.class)
                 .optional().orElse(null);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        final String sql = """
+                select * from `user` where username = :username;
+                """;
+        return jdbcClient.sql(sql)
+                .param("username", username)
+                .query(User.class)
+                .optional().orElse(null);
+    }
+
+    @Override
+    public boolean updateUser(User user) {
+        final String sql = """
+                UPDATE `user` set
+                username = :username,
+                password = :password,
+                email =  :email,
+                first_name = :first_name,
+                last_name = :last_name,
+                bio = :bio,
+                city = :city,
+                state = :state,
+                zip_code = :zip_code,
+                profile_img_url = :profile_img_url,
+                instrument = :instrument
+                WHERE `id` = :id;
+                """;
+        return jdbcClient.sql(sql)
+                .param("username", user.getUsername())
+                .param("password", user.getPassword())
+                .param("email", user.getEmail())
+                .param("first_name", user.getFirstName())
+                .param("last_name", user.getLastName())
+                .param("bio", user.getBio())
+                .param("city", user.getCity())
+                .param("state", user.getState())
+                .param("zip_code", user.getZipCode())
+                .param("profile_img_url", user.getProfileImgUrl())
+                .param("instrument", user.getInstrument())
+                .param("id", user.getId())
+                .update() > 0;
+
+
     }
 }

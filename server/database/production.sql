@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `password` VARCHAR(255) NOT NULL,
   `first_name` VARCHAR(255) ,
   `last_name` VARCHAR(255) ,
+  `bio` TEXT,
   `city` VARCHAR(255) ,
   `state` VARCHAR(255) ,
   `zip_code` VARCHAR(20) ,
