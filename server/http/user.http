@@ -49,3 +49,6 @@ Content-Type: application/json
   "profileImgUrl" : "https://bit.ly/naruto-sage",
   "instrument": "Guitar"
 }
+
+###
+GET {{url}}/test1@gmail.com

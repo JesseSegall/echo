@@ -1,8 +1,10 @@
 import { Box, Flex, Heading, Button, Spacer } from '@chakra-ui/react'
 import {NavLink} from "react-router-dom";
+import { Avatar } from "@chakra-ui/react"
 
 
-function NavBar({user, setUser}) {
+
+function NavBar({user, setUser, fullUser}) {
 
 
     return (
@@ -15,19 +17,26 @@ function NavBar({user, setUser}) {
                         <>
                 <Button as={NavLink} to='/signup' variant="outline" colorScheme="white" mr={3}>Sign Up</Button>
                 <Button as={NavLink} to='/login' variant="outline" colorScheme="white">Login</Button>
-
                         </>
                     )
                 }
                 {
                     user && (
-                        <Button as={NavLink} to='/' variant="outline" colorScheme="white"
-                        onClick={() => {
-                            setUser(null);
-                            localStorage.removeItem('user');
+                        <>
+                            {fullUser && (
+                                <Avatar.Root mr={3} as={NavLink} to={`/profile/${fullUser.username}`} size="md" className="avatar">
+                                    <Avatar.Fallback name={fullUser.username}/>
+                                    <Avatar.Image src={fullUser.profileImgUrl}/>
+                                </Avatar.Root>
+                            )}
+                            <Button as={NavLink} to='/' variant="outline" colorScheme="white"
+                                    onClick={() => {
+                                        setUser(null);
+                                        localStorage.removeItem('user');
 
-                        }}
-                        >Logout</Button>
+                                    }}
+                            >Logout</Button>
+                        </>
                     )
                 }
             </Flex>

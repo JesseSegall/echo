@@ -37,6 +37,7 @@ export default function UserProfile({user: loggedInUser }) {
     const [photoUrl, setPhotoUrl] = useState("");
 
     useEffect(() => {
+        console.log("⏱️ useEffect fired for", username)
         fetch(`http://localhost:8080/api/user/profile/${username}`)
             .then((response) => {
                 if(response.status >= 200 && response.status < 300) {
