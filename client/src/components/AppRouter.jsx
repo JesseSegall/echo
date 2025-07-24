@@ -33,7 +33,7 @@ const AppRouter = () => {
                 },
                 {
                     path: "profile/:username",
-                    element: <UserProfile />
+                    element: <UserProfile user={user}/>
                 },
                 {
                     path: "notFound",
