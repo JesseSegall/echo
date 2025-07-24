@@ -42,6 +42,33 @@ public class UserService {
 
     }
 
+    public Result<User> update(User user){
+        Result<User> result = new Result<>();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+
+        if (!violations.isEmpty()) {
+            for (ConstraintViolation<User> violation : violations) {
+                result.addErrorMessage(violation.getMessage(), ResultType.INVALID);
+            }
+        }
+        if (result.isSuccess()) {
+            boolean updateSuccessful = repository.updateUser(user);
+
+            if (updateSuccessful) {
+                result.setpayload(user);
+            } else {
+                result.addErrorMessage("Failed to update user", ResultType.NOT_FOUND);
+
+            }
+        }
+
+        return result;
+
+
+    }
+
     public Result<User> authenticate(String email, String password){
         Result<User> result = new Result<>();
 

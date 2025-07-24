@@ -29,3 +29,23 @@ Content-Type: application/json
 
 ###
 GET {{url}}/profile/test1
+
+###
+
+PUT {{url}}/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "username": "change",
+  "password": "password",
+  "email": "test1@gmail.com",
+  "firstName": "",
+  "lastName": "Deen",
+  "bio": "Here is a BIo skdfjlskdjflskdjflskjdlfksjdlfksjdlfkjsdlfkjsldkfjs",
+  "state": "AZ",
+  "city": "Tucson",
+  "zipCode": "85715",
+  "profileImgUrl" : "https://bit.ly/naruto-sage",
+  "instrument": "Guitar"
+}

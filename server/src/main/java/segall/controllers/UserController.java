@@ -3,6 +3,7 @@ package segall.controllers;
 import io.jsonwebtoken.Jwts;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import segall.domain.Result;
 import segall.domain.ResultType;
@@ -65,6 +66,18 @@ public class UserController {
         }
 
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> update(@PathVariable int id, @RequestBody User user){
+        if (id != user.getId()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        Result<User> result = service.update(user);
+        if(result.isSuccess()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(result.getErrorMessages(), HttpStatus.BAD_REQUEST);
     }
 
 }

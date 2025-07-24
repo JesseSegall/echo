@@ -66,4 +66,39 @@ public class UserJdbcClientRepository implements UserRepository{
                 .query(User.class)
                 .optional().orElse(null);
     }
+
+    @Override
+    public boolean updateUser(User user) {
+        final String sql = """
+                UPDATE `user` set
+                username = :username,
+                password = :password,
+                email =  :email,
+                first_name = :first_name,
+                last_name = :last_name,
+                bio = :bio,
+                city = :city,
+                state = :state,
+                zip_code = :zip_code,
+                profile_img_url = :profile_img_url,
+                instrument = :instrument
+                WHERE `id` = :id;
+                """;
+        return jdbcClient.sql(sql)
+                .param("username", user.getUsername())
+                .param("password", user.getPassword())
+                .param("email", user.getEmail())
+                .param("first_name", user.getFirstName())
+                .param("last_name", user.getLastName())
+                .param("bio", user.getBio())
+                .param("city", user.getCity())
+                .param("state", user.getState())
+                .param("zip_code", user.getZipCode())
+                .param("profile_img_url", user.getProfileImgUrl())
+                .param("instrument", user.getInstrument())
+                .param("id", user.getId())
+                .update() > 0;
+
+
+    }
 }
