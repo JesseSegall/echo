@@ -57,4 +57,14 @@ public class UserController {
         }
     }
 
+    @GetMapping("/profile/{username}")
+    public ResponseEntity<Object> getUserByUsername(@PathVariable String username){
+        User user = service.findByUsername(username);
+        if(user == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
 }

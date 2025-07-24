@@ -4,14 +4,16 @@ POST {{url}}
 Content-Type: application/json
 
 {
-  "username": "test 1",
+  "username": "test1",
   "password": "password",
   "email": "test1@gmail.com",
   "firstName": "",
   "lastName": "Deen",
+  "bio": "Here is a BIo skdfjlskdjflskdjflskjdlfksjdlfksjdlfkjsdlfkjsldkfjs",
   "state": "AZ",
   "city": "Tucson",
   "zipCode": "85715",
+  "profileImgUrl" : "https://bit.ly/naruto-sage",
   "instrument": "Guitar"
 }
 
@@ -24,3 +26,6 @@ Content-Type: application/json
   "email": "test1@gmail.com",
   "password": "password"
 }
+
+###
+GET {{url}}/profile/test1
