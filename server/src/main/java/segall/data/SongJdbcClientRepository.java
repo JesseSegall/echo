@@ -27,7 +27,27 @@ public class SongJdbcClientRepository implements SongRepository{
     }
 
     @Override
-    public List<Song> getSongsById(Long id) {
-        return List.of();
+    public List<Song> getSongsByAlbumId(Long albumId) {
+        final String sql = """
+                select * from songs
+                where album_id = ?;
+                """;
+        return jdbcClient.sql(sql)
+                .param(albumId)
+                .query(new SongMapper())
+                .list();
+    }
+
+    @Override
+    public Song getSongById(Long id) {
+        final String sql = """
+                select * from songs
+                where id = ?;
+                """;
+        return jdbcClient.sql(sql)
+                .param(id)
+                .query(new SongMapper())
+                .optional()
+                .orElse(null);
     }
 }

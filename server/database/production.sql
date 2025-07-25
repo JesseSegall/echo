@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `albums` (
   `title` VARCHAR(255) NOT NULL,
   `release_date` DATE,
   `cover_url` TEXT,
+  `cover_key` TEXT,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `alb_band_fk` FOREIGN KEY (`band_id`) REFERENCES `Band`(`id`) ON DELETE CASCADE
 );

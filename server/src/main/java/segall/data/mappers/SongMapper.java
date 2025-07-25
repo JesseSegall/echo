@@ -17,7 +17,7 @@ public class SongMapper implements RowMapper<Song> {
         song.setDurationSeconds(rs.getInt("duration_seconds"));
         song.setFileKey(rs.getString("file_key"));
         song.setFileUrl(rs.getString("file_url"));
-        song.setCreatedAt(rs.getObject("created_at", java.time.LocalDateTime.class));
+        song.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         return song;
     }
 }

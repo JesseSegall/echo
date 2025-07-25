@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface SongRepository {
     List<Song> getSongsByBandId(Long bandId);
-    List<Song> getSongsById(Long id);
+    List<Song> getSongsByAlbumId(Long albumId);
+    Song getSongById(Long id);
 }
