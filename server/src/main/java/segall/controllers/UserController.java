@@ -80,4 +80,14 @@ public class UserController {
         return new ResponseEntity<>(result.getErrorMessages(), HttpStatus.BAD_REQUEST);
     }
 
+    @GetMapping("/{email}")
+    public ResponseEntity<Object> getUserByEmail(@PathVariable String email){
+        User user = service.findByEmail(email);
+        if(user == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
 }

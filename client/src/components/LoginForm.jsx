@@ -11,12 +11,12 @@ import {
 import {useNavigate} from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 
-export default function LoginForm({setUser}){
+export default function LoginForm({setUser, setFullUser}) {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState([]);
-    const  handleSubmit = async (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const response = await fetch('http://localhost:8080/api/user/authenticate', {
             method: 'POST',
@@ -27,13 +27,27 @@ export default function LoginForm({setUser}){
         });
         if (200 <= response.status && response.status < 300) {
             const userObj = await response.json();
-            console.log(userObj);
             const decodedUserObj = jwtDecode(userObj.jwt);
-            console.log("Decoded obj: ",decodedUserObj);
             const completeUserObj = { ...decodedUserObj, ...userObj };
-            setUser(completeUserObj);
-            localStorage.setItem('user', JSON.stringify(completeUserObj));
-            navigate('/');
+
+            const fullUserResponse = await fetch(`http://localhost:8080/api/user/${completeUserObj.email}`)
+            if (fullUserResponse.ok) {
+                const fullUser = await fullUserResponse.json();
+                console.log("FullUser", fullUser);
+
+
+                setUser(completeUserObj);
+                setFullUser(fullUser);
+
+
+                localStorage.setItem('user', JSON.stringify(completeUserObj));
+
+
+
+
+                navigate(`/profile/${fullUser.username}`);
+
+            }
         } else {
             const errorsPayload = await response.json();
             setErrors(errorsPayload);
