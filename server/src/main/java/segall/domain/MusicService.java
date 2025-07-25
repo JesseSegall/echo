@@ -1,11 +1,12 @@
 package segall.domain;
+import org.springframework.stereotype.Service;
 import segall.dto.AlbumWithTracks;
 import segall.models.Album;
 import segall.models.Song;
 
 import java.util.List;
 
-
+@Service
 public class MusicService {
     private final AlbumService albumService;
     private final SongService songService;
