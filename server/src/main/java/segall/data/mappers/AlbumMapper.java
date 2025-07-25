@@ -14,8 +14,8 @@ public class AlbumMapper implements RowMapper<Album> {
         album.setBandId(rs.getLong("band_id"));
         album.setTitle(rs.getString("title"));
         album.setReleaseDate(rs.getDate("release_date").toLocalDate());
-        album.setCover_url(rs.getString("cover_url"));
-        album.setCover_key(rs.getString("cover_key"));
+        album.setCoverUrl(rs.getString("cover_url"));
+        album.setCoverKey(rs.getString("cover_key"));
         album.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         return album;
     }

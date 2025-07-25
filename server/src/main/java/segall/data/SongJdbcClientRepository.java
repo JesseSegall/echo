@@ -58,8 +58,8 @@ public class SongJdbcClientRepository implements SongRepository{
     @Override
     public Song add(Song song) {
         final String sql = """
-                insert into songs (band_id, album_id, title, duration_seconds, file_key, file_url, created_at)
-                values (:band_id, :album_id, :title, :duration_seconds, :file_key, :file_url, :created_at);
+                insert into songs (band_id, album_id,user_id, title,  file_key, file_url, created_at)
+                values (:band_id, :album_id, :user_id, :title,  :file_key, :file_url, :created_at);
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -67,8 +67,8 @@ public class SongJdbcClientRepository implements SongRepository{
         int rowsAffected = jdbcClient.sql(sql)
                 .param("band_id", song.getBandId())
                 .param("album_id", song.getAlbumId())
+                .param("user_id", song.getUserId())
                 .param("title", song.getTitle())
-                .param("duration_seconds", song.getDurationSeconds())
                 .param("file_key", song.getFileKey())
                 .param("file_url", song.getFileUrl())
                 .param("created_at", song.getCreatedAt())

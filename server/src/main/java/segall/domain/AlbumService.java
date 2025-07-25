@@ -63,7 +63,7 @@ public class AlbumService {
                 String publicUrl = storageService.upload(cover);
                 String key       = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
 
-               
+
                 Album album = new Album();
                 album.setBandId(bandId);
                 album.setTitle(title);

@@ -20,16 +20,28 @@ public class S3StorageService implements StorageService {
         this.bucket = bucket;
     }
 
+
     @Override
     public String upload(MultipartFile file) throws IOException {
         String key = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        return uploadWithKey(file, key);
+    }
+
+
+    public String upload(MultipartFile file, String folder, Long entityId) throws IOException {
+        String key = String.format("%s/%d/songs/%s_%s",
+                folder, entityId, UUID.randomUUID(), file.getOriginalFilename());
+        return uploadWithKey(file, key);
+    }
+
+
+    private String uploadWithKey(MultipartFile file, String key) throws IOException {
         s3.putObject(PutObjectRequest.builder()
                         .bucket(bucket)
                         .key(key)
                         .contentType(file.getContentType())
                         .build(),
                 RequestBody.fromBytes(file.getBytes()));
-
 
         return s3.utilities()
                 .getUrl(GetUrlRequest.builder().bucket(bucket).key(key).build())

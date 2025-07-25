@@ -10,23 +10,29 @@ import java.util.Objects;
 public class Song {
     private Long id;
 
-    @NotNull(message = "Band ID is required")
-    private Long bandId;
+    private Long   userId;            // ← new
+    private Long   bandId;
 
     private Long albumId;
 
     @NotBlank(message = "Title is required")
     private String title;
 
-    @NotNull(message = "Duration is required")
-    @Min(value = 1, message = "Duration must be at least 1 second")
-    private Integer durationSeconds;
+
 
 
     private String fileKey;
     private String fileUrl;
 
     private LocalDateTime createdAt;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public Long getId() {
         return id;
@@ -60,13 +66,6 @@ public class Song {
         this.title = title;
     }
 
-    public Integer getDurationSeconds() {
-        return durationSeconds;
-    }
-
-    public void setDurationSeconds(Integer durationSeconds) {
-        this.durationSeconds = durationSeconds;
-    }
 
     public String getFileKey() {
         return fileKey;
@@ -92,15 +91,5 @@ public class Song {
         this.createdAt = createdAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Song song = (Song) o;
-        return Objects.equals(id, song.id) && Objects.equals(bandId, song.bandId) && Objects.equals(albumId, song.albumId) && Objects.equals(title, song.title) && Objects.equals(durationSeconds, song.durationSeconds) && Objects.equals(fileKey, song.fileKey) && Objects.equals(fileUrl, song.fileUrl) && Objects.equals(createdAt, song.createdAt);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, bandId, albumId, title, durationSeconds, fileKey, fileUrl, createdAt);
-    }
 }
