@@ -6,8 +6,8 @@ import segall.models.Song;
 import java.util.List;
 
 public class AlbumWithTracks {
-    private Album album;
-    private List<Song> tracks;
+    private final Album album;
+    private final List<Song> tracks;
 
     public AlbumWithTracks(Album album, List<Song> tracks) {
         this.album = album;

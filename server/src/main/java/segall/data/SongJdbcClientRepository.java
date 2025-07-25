@@ -1,11 +1,15 @@
 package segall.data;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import segall.data.mappers.SongMapper;
 import segall.models.Song;
 
 import java.util.List;
+import java.util.Objects;
+
 @Repository
 public class SongJdbcClientRepository implements SongRepository{
     private final JdbcClient jdbcClient;
@@ -49,5 +53,30 @@ public class SongJdbcClientRepository implements SongRepository{
                 .query(new SongMapper())
                 .optional()
                 .orElse(null);
+    }
+
+    @Override
+    public Song add(Song song) {
+        final String sql = """
+                insert into songs (band_id, album_id, title, duration_seconds, file_key, file_url, created_at)
+                values (:band_id, :album_id, :title, :duration_seconds, :file_key, :file_url, :created_at);
+                """;
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        int rowsAffected = jdbcClient.sql(sql)
+                .param("band_id", song.getBandId())
+                .param("album_id", song.getAlbumId())
+                .param("title", song.getTitle())
+                .param("duration_seconds", song.getDurationSeconds())
+                .param("file_key", song.getFileKey())
+                .param("file_url", song.getFileUrl())
+                .param("created_at", song.getCreatedAt())
+                .update(keyHolder, "id");
+        if(rowsAffected == 0){
+            return null;
+        }
+        song.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        return null;
     }
 }

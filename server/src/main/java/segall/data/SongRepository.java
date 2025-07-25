@@ -8,4 +8,6 @@ public interface SongRepository {
     List<Song> getSongsByBandId(Long bandId);
     List<Song> getSongsByAlbumId(Long albumId);
     Song getSongById(Long id);
+
+    Song add(Song song);
 }

@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface AlbumRepository {
     Optional<Album> findAlbumById(Long id);
+    Album add(Album album);
 }

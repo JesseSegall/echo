@@ -5,7 +5,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
 import segall.data.UserRepository;
 import segall.models.User;

@@ -10,8 +10,8 @@ public class Album {
     private Long bandId;
     private String title;
     private LocalDate releaseDate;
-    private String cover_url;
-    private String cover_key;
+    private String coverUrl;
+    private String coverKey;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -46,20 +46,20 @@ public class Album {
         this.releaseDate = releaseDate;
     }
 
-    public String getCover_url() {
-        return cover_url;
+    public String getCoverUrl() {
+        return coverUrl;
     }
 
-    public void setCover_url(String cover_url) {
-        this.cover_url = cover_url;
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 
-    public String getCover_key() {
-        return cover_key;
+    public String getCoverKey() {
+        return coverKey;
     }
 
-    public void setCover_key(String cover_key) {
-        this.cover_key = cover_key;
+    public void setCoverKey(String coverKey) {
+        this.coverKey = coverKey;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -74,11 +74,11 @@ public class Album {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Album album = (Album) o;
-        return Objects.equals(id, album.id) && Objects.equals(bandId, album.bandId) && Objects.equals(title, album.title) && Objects.equals(releaseDate, album.releaseDate) && Objects.equals(cover_url, album.cover_url) && Objects.equals(cover_key, album.cover_key) && Objects.equals(createdAt, album.createdAt);
+        return Objects.equals(id, album.id) && Objects.equals(bandId, album.bandId) && Objects.equals(title, album.title) && Objects.equals(releaseDate, album.releaseDate) && Objects.equals(coverUrl, album.coverUrl) && Objects.equals(coverKey, album.coverKey) && Objects.equals(createdAt, album.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, bandId, title, releaseDate, cover_url, cover_key, createdAt);
+        return Objects.hash(id, bandId, title, releaseDate, coverUrl, coverKey, createdAt);
     }
 }
