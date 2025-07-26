@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
     (user_id IS NULL AND band_id IS NOT NULL)
   )
 );
--- Insert a test user into the User table
+
 INSERT INTO `user` (
     username, 
     password, 

@@ -13,7 +13,7 @@ import segall.models.Song;
 
 @RestController
 @RequestMapping("/api/band")
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class BandController {
 
     private final SongService songService;

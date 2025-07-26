@@ -24,7 +24,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = {"http://localhost:5173"})
+
 public class UserController {
     UserService service;
     SongService songService;
@@ -42,18 +42,31 @@ public class UserController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestHeader Map<String, String> headers
-
     ) {
+        System.out.println("=== UPLOAD DEBUG ===");
+        System.out.println("Path userId: " + userId);
+        System.out.println("Path userId type: " + userId.getClass().getName());
+
         Integer userIdFromHeaders = getUserIdFromHeaders(headers);
-        if(userIdFromHeaders ==  null){
+        System.out.println("User ID from JWT: " + userIdFromHeaders);
+        System.out.println("User ID from JWT type: " + (userIdFromHeaders != null ? userIdFromHeaders.getClass().getName() : "null"));
+
+        if(userIdFromHeaders == null){
+            System.out.println("User ID from headers is null - returning UNAUTHORIZED");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
+        System.out.println("Comparing: " + userIdFromHeaders + " with " + userId.intValue());
+        System.out.println("Are they equal? " + userIdFromHeaders.equals(userId.intValue()));
+
         if(!userIdFromHeaders.equals(userId.intValue())){
+            System.out.println("User IDs don't match - returning FORBIDDEN");
             return new ResponseEntity<>(List.of("You do not have access"), HttpStatus.FORBIDDEN);
         }
-        Result<Song> result = songService.addUserSong(
-                file, userId, title
-        );
+
+        System.out.println("Authorization successful, proceeding with upload...");
+
+        Result<Song> result = songService.addUserSong(file, userId, title);
         if (!result.isSuccess()) {
             return ResponseEntity.badRequest().body(result.getErrorMessages());
         }
@@ -152,18 +165,61 @@ public class UserController {
     }
 
     private Integer getUserIdFromHeaders(Map<String, String> headers){
-        String jwt = headers.get("authorization");
+        System.out.println("=== JWT PARSING DEBUG ===");
+        System.out.println("All headers: " + headers);
 
-        try {
-            Jws<Claims> parsedJwt = Jwts.parserBuilder()
-                    .setSigningKey(secretSigningKey.getSigningKey())
-                    .build().parseClaimsJws(jwt);
-            return (Integer) parsedJwt.getBody().get("id");
-        }catch (SignatureException ex){
+        String jwt = headers.get("authorization");
+        System.out.println("JWT from 'authorization' header: '" + jwt + "'");
+
+        if (jwt == null) {
+            System.out.println("Trying 'Authorization' with capital A...");
+            jwt = headers.get("Authorization");
+            System.out.println("JWT from 'Authorization' header: '" + jwt + "'");
+        }
+
+        if (jwt == null || jwt.isEmpty()) {
+            System.out.println("JWT is null or empty - returning null");
             return null;
         }
 
+        // Check if JWT has Bearer prefix
+        if (jwt.startsWith("Bearer ")) {
+            System.out.println("JWT has 'Bearer ' prefix, removing it...");
+            jwt = jwt.substring(7);
+            System.out.println("JWT after removing Bearer: '" + jwt + "'");
+        }
 
+        System.out.println("JWT length: " + jwt.length());
+        System.out.println("JWT starts with: " + jwt.substring(0, Math.min(20, jwt.length())));
+
+        try {
+            System.out.println("About to parse JWT with signing key...");
+            System.out.println("Signing key is null? " + (secretSigningKey.getSigningKey() == null));
+
+            Jws<Claims> parsedJwt = Jwts.parserBuilder()
+                    .setSigningKey(secretSigningKey.getSigningKey())
+                    .build()
+                    .parseClaimsJws(jwt);
+
+            System.out.println("JWT parsed successfully!");
+
+            Claims claims = parsedJwt.getBody();
+            System.out.println("All claims: " + claims);
+
+            Object idClaim = claims.get("id");
+            System.out.println("Raw ID claim: " + idClaim);
+            System.out.println("ID claim type: " + (idClaim != null ? idClaim.getClass().getName() : "null"));
+
+            Integer userId = (Integer) idClaim;
+            System.out.println("Final user ID: " + userId);
+            return userId;
+
+        } catch (Exception ex) {
+            System.out.println("JWT parsing failed with exception: " + ex.getClass().getName());
+            System.out.println("Exception message: " + ex.getMessage());
+            ex.printStackTrace();
+            return null;
+        }
     }
 
 }
