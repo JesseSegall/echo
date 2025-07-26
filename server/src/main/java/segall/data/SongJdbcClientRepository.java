@@ -79,4 +79,11 @@ public class SongJdbcClientRepository implements SongRepository{
         song.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return null;
     }
+
+    @Override
+    public boolean deleteById(Long id) {
+        final String sql = "delete from songs where id = ?";
+
+        return jdbcClient.sql(sql).param(id).update()>0;
+    }
 }

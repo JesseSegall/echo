@@ -1,11 +1,13 @@
 package segall.domain;
 
+import ch.qos.logback.core.pattern.util.RestrictedEscapeUtil;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import segall.data.SongJdbcClientRepository;
 import segall.models.Song;
+import segall.storage.S3StorageService;
 import segall.storage.StorageService;
 
 import java.io.IOException;
@@ -44,7 +46,7 @@ public class SongService {
         if (result.isSuccess()) {
             try {
                 String publicUrl = storageService.upload(file, "band", bandId);
-                String key       = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
+                String key = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
 
                 Song song = new Song();
                 song.setBandId(bandId);
@@ -131,4 +133,28 @@ public class SongService {
     public Song getSongById(Long id){
         return repository.getSongById(id);
     }
+
+    public Result<Song> deleteById(Long id) {
+        Result<Song> result = new Result<>();
+
+
+        Song song = getSongById(id);
+        if (song == null) {
+            result.addErrorMessage("Song id %s was not found", ResultType.NOT_FOUND, id);
+            return result;
+        }
+
+
+        boolean removed = repository.deleteById(id);
+        if (!removed) {
+            result.addErrorMessage("Failed to delete song record with id %s", ResultType.INVALID, id);
+            return result;
+        }
+
+
+        storageService.delete(song.getFileKey());
+
+        return result;
+    }
+
 }

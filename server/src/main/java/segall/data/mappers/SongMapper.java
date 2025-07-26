@@ -5,6 +5,7 @@ import segall.models.Song;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class SongMapper implements RowMapper<Song> {
     @Override
@@ -17,7 +18,13 @@ public class SongMapper implements RowMapper<Song> {
         song.setTitle(rs.getString("title"));
         song.setFileKey(rs.getString("file_key"));
         song.setFileUrl(rs.getString("file_url"));
-        song.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        Timestamp ts = rs.getTimestamp("created_at");
+        if (ts != null) {
+            song.setCreatedAt(ts.toLocalDateTime());
+        } else {
+            song.setCreatedAt(null);
+        }
+
         return song;
     }
 }

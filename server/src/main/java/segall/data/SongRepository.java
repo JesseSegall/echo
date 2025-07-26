@@ -10,4 +10,5 @@ public interface SongRepository {
     Song getSongById(Long id);
 
     Song add(Song song);
+    boolean deleteById(Long id);
 }

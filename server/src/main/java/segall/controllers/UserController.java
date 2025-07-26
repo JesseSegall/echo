@@ -1,6 +1,9 @@
 package segall.controllers;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +17,9 @@ import segall.domain.UserService;
 import segall.models.Song;
 import segall.models.User;
 
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,17 +40,42 @@ public class UserController {
     public ResponseEntity<Object> uploadForUser(
             @PathVariable Long userId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("title") String title
+            @RequestParam("title") String title,
+            @RequestHeader Map<String, String> headers
 
     ) {
-        Result<Song> r = songService.addUserSong(
+        Integer userIdFromHeaders = getUserIdFromHeaders(headers);
+        if(userIdFromHeaders ==  null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(!userIdFromHeaders.equals(userId.intValue())){
+            return new ResponseEntity<>(List.of("You do not have access"), HttpStatus.FORBIDDEN);
+        }
+        Result<Song> result = songService.addUserSong(
                 file, userId, title
         );
-        if (!r.isSuccess()) {
-            return ResponseEntity.badRequest().body(r.getErrorMessages());
+        if (!result.isSuccess()) {
+            return ResponseEntity.badRequest().body(result.getErrorMessages());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(r.getpayload());
+        return ResponseEntity.status(HttpStatus.CREATED).body(result.getpayload());
     }
+    @DeleteMapping("/songs/{songId}")
+    public ResponseEntity<Object> deleteUserSong(@PathVariable Long songId, @RequestHeader Map<String, String> headers) {
+
+        Integer userIdFromHeaders = getUserIdFromHeaders(headers);
+        if(userIdFromHeaders == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Result<Song> removed = songService.deleteById( songId);
+        if (!removed.isSuccess()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(removed.getErrorMessages() );
+        }
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody User user){
@@ -90,7 +120,17 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable int id, @RequestBody User user){
+    public ResponseEntity<Object> update(@PathVariable int id, @RequestBody User user, @RequestHeader Map<String, String> headers){
+        Integer userIdFromHeaders = getUserIdFromHeaders(headers);
+        if(userIdFromHeaders == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (userIdFromHeaders != id) {
+            return new ResponseEntity<>(
+                    List.of("Cannot update another user’s profile"),
+                    HttpStatus.FORBIDDEN
+            );
+        }
         if (id != user.getId()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -109,6 +149,21 @@ public class UserController {
         }
 
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    private Integer getUserIdFromHeaders(Map<String, String> headers){
+        String jwt = headers.get("authorization");
+
+        try {
+            Jws<Claims> parsedJwt = Jwts.parserBuilder()
+                    .setSigningKey(secretSigningKey.getSigningKey())
+                    .build().parseClaimsJws(jwt);
+            return (Integer) parsedJwt.getBody().get("id");
+        }catch (SignatureException ex){
+            return null;
+        }
+
+
     }
 
 }

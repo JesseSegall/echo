@@ -59,7 +59,6 @@ CREATE TABLE IF NOT EXISTS `songs` (
   `band_id` INT NULL,
   `album_id` INT NULL,
   `title` TEXT NOT NULL,
-  `duration_seconds` INT,
   `file_key` TEXT NOT NULL,
   `file_url` TEXT NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -167,4 +166,4 @@ INSERT INTO band (name, genre, city, state) VALUES
 ('Electronic Vibes', 'Electronic', 'Austin', 'TX');
 
 select * from `user`;
-
+SELECT * FROM songs;
