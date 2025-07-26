@@ -1,0 +1,18 @@
+@url = http://localhost:8080/api/songs
+
+### 1) Upload a new song
+POST {{url}}
+Content-Type: multipart/form-data
+
+file=@test_song_1.mp3;type=audio/mpeg
+bandId=1
+albumId=2
+title=My Test Song 1
+durationSeconds=180
+
+###
+
+### 2) Get that song back by ID
+# (replace 123 with the actual ID returned above)
+GET {{url}}/123
+Accept: application/json

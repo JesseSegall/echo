@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `profile_img_url` TEXT,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `instrument` VARCHAR(255),
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS `band` (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `band` (
   `state` VARCHAR(255),
   `zip_code` VARCHAR(20),
   `needs_new_member` BOOL NOT NULL DEFAULT FALSE,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS `band_members` (
@@ -48,22 +48,25 @@ CREATE TABLE IF NOT EXISTS `albums` (
   `title` VARCHAR(255) NOT NULL,
   `release_date` DATE,
   `cover_url` TEXT,
+  `cover_key` TEXT,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `alb_band_fk` FOREIGN KEY (`band_id`) REFERENCES `Band`(`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `songs` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `band_id` INT NOT NULL,
+  `user_id` INT NULL,
+  `band_id` INT NULL,
   `album_id` INT NULL,
   `title` TEXT NOT NULL,
-  `duration_seconds` INT,
   `file_key` TEXT NOT NULL,
   `file_url` TEXT NOT NULL,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT `sng_band_fk` FOREIGN KEY (`band_id`) REFERENCES `Band`(`id`) ON DELETE CASCADE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `sng_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `sng_band_fk` FOREIGN KEY (`band_id`) REFERENCES `band`(`id`) ON DELETE CASCADE,
   CONSTRAINT `sng_alb_fk` FOREIGN KEY (`album_id`) REFERENCES `albums`(`id`) ON DELETE SET NULL
 );
+
 
 CREATE TABLE IF NOT EXISTS `conversations` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -132,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
     (user_id IS NULL AND band_id IS NOT NULL)
   )
 );
--- Insert a test user into the User table
+
 INSERT INTO `user` (
     username, 
     password, 
@@ -157,5 +160,10 @@ INSERT INTO `user` (
     'Guitar'
 );
 
-select * from `user`;
+INSERT INTO band (name, genre, city, state) VALUES 
+('The Rockers', 'Rock', 'Los Angeles', 'CA'),
+('Jazz Collective', 'Jazz', 'Chicago', 'IL'),
+('Electronic Vibes', 'Electronic', 'Austin', 'TX');
 
+select * from `user`;
+SELECT * FROM songs;

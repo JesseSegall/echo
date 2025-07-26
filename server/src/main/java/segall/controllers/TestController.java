@@ -1,50 +1,37 @@
 package segall.controllers;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 
 @RestController
+@RequestMapping("/api/test")
 public class TestController {
 
-    @Value("${spring.cloud.aws.credentials.access-key}")
-    private String accessKey;
+    private final S3Client s3;
+    private final String   bucketName;
 
-    @Value("${spring.cloud.aws.credentials.secret-key}")
-    private String secretKey;
+    public TestController(S3Client s3,
+                          @Value("${aws.s3.bucket}") String bucketName) {
+        this.s3         = s3;
+        this.bucketName = bucketName;
+    }
 
-    @Value("${spring.cloud.aws.s3.bucket}")
-    private String bucketName;
-
-    @GetMapping("/test-aws")
-    public ResponseEntity<String> testAWS() {
+    @GetMapping("/s3")
+    public ResponseEntity<String> testS3() {
         try {
-            AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
 
-            S3Client s3Client = S3Client.builder()
-                    .region(Region.US_EAST_1)
-                    .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                    .build();
-
-            ListObjectsV2Request request = ListObjectsV2Request.builder()
+            s3.headBucket(HeadBucketRequest.builder()
                     .bucket(bucketName)
-                    .maxKeys(1)
-                    .build();
-
-            ListObjectsV2Response response = s3Client.listObjectsV2(request);
-
-            return ResponseEntity.ok("AWS S3 connection successful! Bucket: " + bucketName);
-
+                    .build());
+            return ResponseEntity.ok(
+                    "S3 is reachable and bucket '" + bucketName + "' exists"
+            );
         } catch (Exception e) {
-            return ResponseEntity.status(500)
-                    .body("AWS S3 connection failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("S3 test failed: " + e.getMessage());
         }
     }
 }
