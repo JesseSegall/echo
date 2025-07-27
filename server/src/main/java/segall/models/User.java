@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public class User {
-    private int id;
+    private Long id;
     private String username;
     private String password;
     private String email;
@@ -27,11 +27,11 @@ public class User {
         this.bio = bio;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

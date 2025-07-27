@@ -5,18 +5,23 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import segall.data.UserRepository;
 import segall.models.User;
+import segall.storage.StorageService;
 
+import java.io.IOException;
 import java.util.Set;
 @Service
 public class UserService {
     UserRepository repository;
+    StorageService storageService;
 
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository, StorageService storageService) {
         this.repository = repository;
+        this.storageService = storageService;
     }
 
     public Result<User> create(User user){
@@ -42,7 +47,7 @@ public class UserService {
 
     }
 
-    public Result<User> update(User user){
+    public Result<User> update(User user, MultipartFile profilePhoto){
         Result<User> result = new Result<>();
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
@@ -54,6 +59,11 @@ public class UserService {
             }
         }
         if (result.isSuccess()) {
+            try{
+                if (profilePhoto != null && !profilePhoto.isEmpty()) {
+                    String photoUrl = storageService.upload(profilePhoto, "users", user.getId(), "photos");
+                    user.setProfileImgUrl(photoUrl);
+                }
             boolean updateSuccessful = repository.updateUser(user);
 
             if (updateSuccessful) {
@@ -61,6 +71,11 @@ public class UserService {
             } else {
                 result.addErrorMessage("Failed to update user", ResultType.NOT_FOUND);
 
+            }
+            } catch (IOException e) {
+                result.addErrorMessage("Could not upload photo: %s", ResultType.INVALID, e.getMessage());
+            } catch (Exception e) {
+                result.addErrorMessage("Could not update user: %s", ResultType.INVALID, e.getMessage());
             }
         }
 
@@ -94,6 +109,10 @@ public class UserService {
 
     public User findByUsername(String username){
         return repository.findByUsername(username);
+    }
+
+    public User findById(Long userId){
+        return repository.findById(userId);
     }
 
 }

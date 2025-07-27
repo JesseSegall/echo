@@ -6,6 +6,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import segall.data.mappers.UserMapper;
 import segall.models.User;
+
+import java.util.Objects;
+
 @Repository
 
 public class UserJdbcClientRepository implements UserRepository{
@@ -41,7 +44,7 @@ public class UserJdbcClientRepository implements UserRepository{
         if(rowsAffected==0){
             return null;
         }
-        user.setId(keyHolder.getKey().intValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         return user;
     }
 
@@ -65,6 +68,12 @@ public class UserJdbcClientRepository implements UserRepository{
                 .param("username", username)
                 .query(User.class)
                 .optional().orElse(null);
+    }
+
+    @Override
+    public User findById(Long userId) {
+        final String sql = "select * from `user` where id = ?";
+        return jdbcClient.sql(sql).param(userId).query(User.class).optional().orElse(null);
     }
 
     @Override
