@@ -61,7 +61,7 @@ public class UserService {
         if (result.isSuccess()) {
             try{
                 if (profilePhoto != null && !profilePhoto.isEmpty()) {
-                    String photoUrl = storageService.upload(profilePhoto, "users", user.getId(), "photos");
+                    String photoUrl = storageService.upload(profilePhoto, "user", user.getId(), "photos");
                     user.setProfileImgUrl(photoUrl);
                 }
             boolean updateSuccessful = repository.updateUser(user);
