@@ -33,6 +33,12 @@ public class S3StorageService implements StorageService {
                 folder, entityId, UUID.randomUUID(), file.getOriginalFilename());
         return uploadWithKey(file, key);
     }
+    @Override
+    public String upload(MultipartFile file, String folder, Long entityId, String subfolder) throws IOException {
+        String key = String.format("%s/%d/%s/%s_%s",
+                folder, entityId, subfolder, UUID.randomUUID(), file.getOriginalFilename());
+        return uploadWithKey(file, key);
+    }
 
 
     private String uploadWithKey(MultipartFile file, String key) throws IOException {

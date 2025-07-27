@@ -71,9 +71,7 @@ public class SongService {
         return result;
     }
 
-    public Result<Song> addUserSong(MultipartFile file,
-                                    Long userId,
-                                    String title) {
+    public Result<Song> addUserSong(MultipartFile file, Long userId, String title) {
         Result<Song> result = new Result<>();
 
         Song toValidate = new Song();
@@ -93,7 +91,7 @@ public class SongService {
         if (result.isSuccess()) {
             try {
                 String publicUrl = storageService.upload(file, "user", userId);
-                String key       = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
+                String key = publicUrl.substring(publicUrl.lastIndexOf('/') + 1);
 
                 Song song = new Song();
                 song.setUserId(userId);
@@ -132,6 +130,10 @@ public class SongService {
 
     public Song getSongById(Long id){
         return repository.getSongById(id);
+    }
+
+    public List<Song> getSongsByUserId(Long userId){
+        return repository.getSongsByUserId(userId);
     }
 
     public Result<Song> deleteById(Long id) {

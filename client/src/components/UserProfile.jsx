@@ -92,18 +92,26 @@ export default function UserProfile({ user: loggedInUser }) {
 	};
 
 	const handleSavePhoto = async () => {
-		const res = await fetch(`http://localhost:8080/api/user/${profileUser.id}`, {
+		const photoFile = fileInputRef.current.files[0];
+		if (!photoFile) return;
+
+		const formData = new FormData();
+		formData.append('profilePhoto', photoFile);
+
+		const res = await fetch(`http://localhost:8080/api/user/${profileUser.id}/photo`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json',
 				Authorization: loggedInUser.jwt,
 			},
-			body: JSON.stringify({ ...profileUser, profileImgUrl: photoUrl }),
+			body: formData,
 		});
+
 		if (res.ok) {
-			setProfileUser((p) => ({ ...p, profileImgUrl: photoUrl }));
-			setPhotoUrl('');
+			const updatedUser = await res.json();
+			setProfileUser(updatedUser);
+			setSelectedFileName('');
 			setIsPhotoDialogOpen(false);
+			fileInputRef.current.value = '';
 		}
 	};
 
@@ -255,7 +263,6 @@ export default function UserProfile({ user: loggedInUser }) {
 				</Flex>
 			</Box>
 
-			{/* Photo + Bio section */}
 			<Box bg='white' borderWidth='1px' borderColor='gray.300' borderRadius='lg' p={6} mb={4}>
 				<Flex gap={10} align='center' justify='space-between'>
 					<Box position='relative'>
@@ -367,11 +374,40 @@ export default function UserProfile({ user: loggedInUser }) {
 									<Text fontSize='sm' mb={2} fontWeight='medium'>
 										Photo URL
 									</Text>
-									<Input
-										placeholder='Enter image URL (for now)'
-										value={photoUrl}
-										onChange={(e) => setPhotoUrl(e.target.value)}
+									{selectedFileName && (
+										<Text mb={2} color='gray.700'>
+											Selected: {selectedFileName}
+										</Text>
+									)}
+
+									<input
+										ref={fileInputRef}
+										type='file'
+										accept='image/*'
+										style={{ display: 'none' }}
+										onChange={(e) => {
+											const f = e.target.files[0];
+											setSelectedFileName(f ? f.name : '');
+										}}
 									/>
+									<Button
+										colorScheme='blue'
+										mr={3}
+										onClick={handleSavePhoto}
+										isDisabled={!selectedFileName}
+									>
+										Save Photo Button
+									</Button>
+									<Button
+										onClick={() => {
+											setSelectedFileName('');
+											fileInputRef.current.click();
+										}}
+										colorScheme='blue'
+										mr={2}
+									>
+										Select File
+									</Button>
 								</Box>
 								{photoUrl && (
 									<Box mt={4}>
@@ -389,9 +425,9 @@ export default function UserProfile({ user: loggedInUser }) {
 								)}
 							</Dialog.Body>
 							<Dialog.Footer>
-								<Button colorScheme='blue' mr={3} onClick={handleSavePhoto} isDisabled={!photoUrl}>
+								{/* <Button colorScheme='blue' mr={3} onClick={handleSavePhoto} isDisabled={!photoUrl}>
 									Save Photo
-								</Button>
+								</Button> */}
 								<Button variant='ghost' onClick={() => setIsPhotoDialogOpen(false)}>
 									Cancel
 								</Button>
@@ -443,7 +479,7 @@ export default function UserProfile({ user: loggedInUser }) {
 
 								<Button
 									onClick={() => {
-										setSelectedFileName(''); // clear previous
+										setSelectedFileName('');
 										fileInputRef.current.click();
 									}}
 									colorScheme='blue'

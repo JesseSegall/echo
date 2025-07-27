@@ -56,6 +56,19 @@ public class SongJdbcClientRepository implements SongRepository{
     }
 
     @Override
+    public List<Song> getSongsByUserId(Long userId) {
+        final String sql = """
+                
+                select * from songs where user_id = ?;
+                
+                """;
+        return jdbcClient.sql(sql)
+                .param(userId)
+                .query(new SongMapper())
+                .list();
+    }
+
+    @Override
     public Song add(Song song) {
         final String sql = """
                 insert into songs (band_id, album_id,user_id, title,  file_key, file_url, created_at)
