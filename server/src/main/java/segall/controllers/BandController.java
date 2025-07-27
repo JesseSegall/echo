@@ -22,10 +22,8 @@ public class BandController {
         this.songService = songService;
     }
 
-    /**
-     * Upload a new song: file + metadata.
-     * Returns 201 with the Song on success, or 400 with validation errors.
-     */
+
+    // TODO need to make sure only the correct band can upload or delete songs/albums
     @PostMapping(value="/{bandId}/songs",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> addBandSong(
             @PathVariable Long bandId,
@@ -48,7 +46,7 @@ public class BandController {
                 .body(result.getpayload());
     }
 
-    /** Get a single song by ID (404 if not found) */
+
     @GetMapping("/{id}")
     public ResponseEntity<Object> getSong(@PathVariable Long id) {
         try {
@@ -61,20 +59,5 @@ public class BandController {
         }
     }
 
-    /** Delete a song (removes from S3 + DB) */
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<?> deleteSong(@PathVariable Long id) {
-//        try {
-//            songService.deleteById(id);
-//            return ResponseEntity.noContent().build();
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity
-//                    .status(HttpStatus.NOT_FOUND)
-//                    .body(e.getMessage());
-//        } catch (Exception e) {
-//            return ResponseEntity
-//                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Failed to delete song: " + e.getMessage());
-//        }
-//    }
+
 }
