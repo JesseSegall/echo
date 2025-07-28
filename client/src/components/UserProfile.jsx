@@ -16,6 +16,9 @@ import {
 	Heading,
 } from '@chakra-ui/react';
 import AudioPlayer from './AudioPlayer';
+import PostCard from './PostCard';
+
+// TODO: need to chop this down; refactor into smaller components
 
 export default function UserProfile({ user: loggedInUser }) {
 	const { username } = useParams();
@@ -32,7 +35,9 @@ export default function UserProfile({ user: loggedInUser }) {
 	const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
 	const [photoUrl, setPhotoUrl] = useState('');
 	const [selectedFileName, setSelectedFileName] = useState('');
-
+	const [posts, setPosts] = useState([]);
+	const [newPostContent, setNewPostContent] = useState('');
+	// Getting info for profile from user
 	useEffect(() => {
 		fetch(`http://localhost:8080/api/user/profile/${username}`)
 			.then((res) => {
@@ -50,7 +55,7 @@ export default function UserProfile({ user: loggedInUser }) {
 			})
 			.catch(() => navigate('/notFound'));
 	}, [username, navigate]);
-
+	// Getting all the songs if any
 	useEffect(() => {
 		if (!profileUser) return;
 		fetch(`http://localhost:8080/api/user/${profileUser.id}/songs`, {
@@ -59,6 +64,18 @@ export default function UserProfile({ user: loggedInUser }) {
 			.then((res) => (res.ok ? res.json() : []))
 			.then(setSongs)
 			.catch(() => setSongs([]));
+	}, [profileUser, loggedInUser]);
+
+	// getting all the posts by the user
+	useEffect(() => {
+		if (!profileUser) return;
+
+		fetch(`http://localhost:8080/api/posts/user/${profileUser.id}`, {
+			headers: { Authorization: loggedInUser.jwt },
+		})
+			.then((res) => (res.ok ? res.json() : []))
+			.then(setPosts)
+			.catch(() => setPosts([]));
 	}, [profileUser, loggedInUser]);
 
 	const handleSaveBio = async () => {
@@ -71,7 +88,7 @@ export default function UserProfile({ user: loggedInUser }) {
 			body: JSON.stringify({ ...profileUser, bio: bioValue }),
 		});
 		if (res.ok) {
-			setProfileUser((p) => ({ ...p, bio: bioValue }));
+			setProfileUser((profile) => ({ ...profile, bio: bioValue }));
 			setIsEditingBio(false);
 		}
 	};
@@ -86,7 +103,7 @@ export default function UserProfile({ user: loggedInUser }) {
 			body: JSON.stringify({ ...profileUser, ...infoValues }),
 		});
 		if (res.ok) {
-			setProfileUser((p) => ({ ...p, ...infoValues }));
+			setProfileUser((profile) => ({ ...profile, ...infoValues }));
 			setIsEditingInfo(false);
 		}
 	};
@@ -145,6 +162,51 @@ export default function UserProfile({ user: loggedInUser }) {
 			const errorText = await res.text();
 			console.error('Upload failed', errorText);
 		}
+	};
+	const handleAddPost = async () => {
+		if (!newPostContent.trim()) return;
+
+		try {
+			const payload = {
+				body: newPostContent,
+				userId: profileUser.id, // Add userId
+				bandId: null, // Explicitly set bandId to null
+			};
+
+			console.log('Sending payload:', payload);
+
+			const res = await fetch(`http://localhost:8080/api/posts/user/${profileUser.id}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: loggedInUser.jwt,
+				},
+				body: JSON.stringify(payload),
+			});
+
+			if (res.ok) {
+				const newPost = await res.json();
+				setPosts((prevPosts) => [newPost, ...prevPosts]);
+				setNewPostContent('');
+			} else {
+				const errorText = await res.text();
+				console.error('Failed to create post. Status:', res.status);
+				console.error('Error response:', errorText);
+			}
+		} catch (error) {
+			console.error('Error creating post:', error);
+		}
+	};
+
+	// Call backs for deleting and updating posts
+	const handlePostDeleted = (postId) => {
+		setPosts((prevPosts) => prevPosts.filter((profile) => profile.id !== postId));
+	};
+
+	const handlePostUpdated = (postId, newContent) => {
+		setPosts((prevPosts) =>
+			prevPosts.map((post) => (post.id === postId ? { ...post, body: newContent } : post))
+		);
 	};
 
 	const isOwnProfile = loggedInUser && profileUser && loggedInUser.id === profileUser.id;
@@ -493,6 +555,84 @@ export default function UserProfile({ user: loggedInUser }) {
 							</>
 						) : (
 							<Text color='gray.500'>This user hasn’t uploaded any songs yet.</Text>
+						)}
+					</Box>
+				)}
+			</Box>
+
+			{/* Posts Section */}
+			<Box bg='white' borderWidth='1px' borderRadius='lg' p={6} mt={6}>
+				<Heading size='md' mb={4}>
+					Posts
+				</Heading>
+
+				{/* Add Post Section only profile user can see this*/}
+				{isOwnProfile && (
+					<Box
+						border='1px solid'
+						borderColor='gray.200'
+						borderRadius='md'
+						p={4}
+						mb={4}
+						bg='gray.50'
+					>
+						<VStack spacing={3} align='stretch'>
+							<Textarea
+								placeholder="What's on your mind?"
+								value={newPostContent}
+								onChange={(e) => setNewPostContent(e.target.value)}
+								resize='none'
+								rows={3}
+								bg='white'
+								border='1px solid'
+								borderColor='gray.200'
+								borderRadius='8px'
+								fontSize='md'
+								_focus={{
+									borderColor: 'blue.400',
+									boxShadow: '0 0 0 1px blue.400',
+								}}
+							/>
+							<HStack justify='flex-end'>
+								<Button
+									size='sm'
+									colorScheme='blue'
+									onClick={handleAddPost}
+									isDisabled={!newPostContent.trim()}
+								>
+									Add Post
+								</Button>
+							</HStack>
+						</VStack>
+					</Box>
+				)}
+
+				{/* Posts List */}
+				{posts.length > 0 ? (
+					<VStack spacing={4} align='stretch'>
+						{posts.map((post) => (
+							<PostCard
+								key={post.id}
+								profileUser={profileUser}
+								post={post}
+								loggedInUser={loggedInUser}
+								onPostDeleted={handlePostDeleted}
+								onPostUpdated={handlePostUpdated}
+							/>
+						))}
+					</VStack>
+				) : (
+					<Box
+						border='2px dashed'
+						borderColor='gray.300'
+						borderRadius='md'
+						p={8}
+						textAlign='center'
+					>
+						{isOwnProfile ? (
+							<Text color='gray.500'>You haven't added any posts yet!</Text>
+						) : (
+							<Text color='gray.500'>This user hasn't posted anything yet.</Text>
 						)}
 					</Box>
 				)}

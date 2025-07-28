@@ -9,6 +9,7 @@ import segall.domain.PostService;
 import segall.domain.Result;
 import segall.models.Post;
 import segall.utils.JwtUtil;
+import java.time.LocalDateTime;
 
 import java.util.List;
 import java.util.Map;
@@ -38,12 +39,18 @@ public class PostController {
                     HttpStatus.FORBIDDEN
             );
         }
-
+        post.setCreatedAt( LocalDateTime.now());
         Result<Post> result = service.addPost(post);
         if(result.isSuccess()){
             return new ResponseEntity<>(result.getpayload(), HttpStatus.OK);
         }
         return new ResponseEntity<>(result.getErrorMessages(), HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Object> getAllPostsByUserId(@PathVariable Long userId){
+        List<Post> posts = service.getPostsByUserId(userId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     @GetMapping("/{postId}")
@@ -56,6 +63,45 @@ public class PostController {
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deletePostById(@PathVariable Long id, @RequestHeader Map<String, String> headers){
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if(userIdFromHeaders == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        boolean deleted = service.DeletePostById(id);
+        if(!deleted){
+            return new ResponseEntity<>("No post with that Id was found", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PutMapping("/{postId}")
+    public ResponseEntity<Object> updatePost(@PathVariable Long postId, @RequestBody Post post,
+                                             @RequestHeader Map<String, String> headers){
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if(userIdFromHeaders == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+
+        Post existingPost = service.getPostById(postId);
+        if(existingPost == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if(!userIdFromHeaders.equals(existingPost.getUserId().intValue())){
+            return new ResponseEntity<>(List.of("Cannot edit another user's post"), HttpStatus.FORBIDDEN);
+        }
+
+
+        post.setCreatedAt(existingPost.getCreatedAt());
+
+        Result<Post> result = service.updatePost(post);
+        if(result.isSuccess()){
+            return new ResponseEntity<>(result.getpayload(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(result.getErrorMessages(), HttpStatus.BAD_REQUEST);
+    }
 
 
 }

@@ -1,11 +1,14 @@
 package segall.models;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.time.LocalDateTime;
 
 public class Post {
     private Long id;
     private Long userId;
     private Long bandId;
+    @NotBlank(message = "Message body is required")
     private String body;
     private LocalDateTime createdAt;
 

@@ -10,4 +10,5 @@ public interface PostRepository {
     Post getPostById(Long id);
     Post add(Post post);
     boolean deletePostById(Long id);
+    boolean updatePost(Post post);
 }

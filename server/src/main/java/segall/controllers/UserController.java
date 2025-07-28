@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import segall.domain.Result;
@@ -19,6 +20,7 @@ import segall.models.User;
 import segall.utils.JwtUtil;
 
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +46,8 @@ public class UserController {
             @PathVariable Long userId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
-            @RequestHeader Map<String, String> headers
-    ) {
+            @RequestHeader Map<String, String> headers,
+            BindingResult bindingResult) {
 
 
         Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
@@ -65,6 +67,7 @@ public class UserController {
 
 
         Result<Song> result = songService.addUserSong(file, userId, title);
+        result.getpayload().setCreatedAt(LocalDateTime.now());
         if (!result.isSuccess()) {
             return ResponseEntity.badRequest().body(result.getErrorMessages());
         }
@@ -86,6 +89,7 @@ public class UserController {
         if(userIdFromHeaders == null){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
 
         Result<Song> removed = songService.deleteById( songId);
         if (!removed.isSuccess()) {

@@ -73,4 +73,24 @@ public class PostJdbcClientRepository implements PostRepository{
 
         return jdbcClient.sql(sql).param(id).update()>0;
     }
+
+    @Override
+    public boolean updatePost(Post post) {
+        final String sql = """
+                update posts set
+                user_id = :user_id,
+                band_id = :band_id,
+                body = :body,
+                created_at = :created_at
+                where `id` = :id;
+                
+                """;
+        return jdbcClient.sql(sql)
+                .param("user_id", post.getUserId())
+                .param("band_id", post.getBandId())
+                .param("body", post.getBody())
+                .param("created_at", post.getCreatedAt())
+                .param("id", post.getId())
+                .update() > 0;
+    }
 }
