@@ -168,3 +168,4 @@ INSERT INTO band (name, genre, city, state) VALUES
 select * from `user`;
 select * from posts;
 SELECT * FROM songs;
+select * from comments;
