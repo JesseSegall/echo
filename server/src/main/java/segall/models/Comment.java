@@ -1,15 +1,13 @@
 package segall.models;
 
-import jakarta.validation.constraints.NotBlank;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Post {
+public class Comment {
     private Long id;
+    private Long postId;
     private Long userId;
     private Long bandId;
-    @NotBlank(message = "Message body is required")
     private String body;
     private LocalDateTime createdAt;
 
@@ -19,6 +17,14 @@ public class Post {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Long postId) {
+        this.postId = postId;
     }
 
     public Long getUserId() {
@@ -56,12 +62,12 @@ public class Post {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Post post = (Post) o;
-        return Objects.equals(id, post.id) && Objects.equals(userId, post.userId) && Objects.equals(bandId, post.bandId) && Objects.equals(body, post.body) && Objects.equals(createdAt, post.createdAt);
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id) && Objects.equals(postId, comment.postId) && Objects.equals(userId, comment.userId) && Objects.equals(bandId, comment.bandId) && Objects.equals(body, comment.body) && Objects.equals(createdAt, comment.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, bandId, body, createdAt);
+        return Objects.hash(id, postId, userId, bandId, body, createdAt);
     }
 }
