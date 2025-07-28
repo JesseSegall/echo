@@ -1,7 +1,7 @@
 package segall.models;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 public class Conversation {
     private Long id;
@@ -9,8 +9,25 @@ public class Conversation {
     private LocalDateTime lastMessageAt;
 
     private String otherUserName;
+    private String otherUserImage;
 
-    private List<Long> userIds;
+    private String lastMessageText;
+
+    public String getLastMessageText() {
+        return lastMessageText;
+    }
+
+    public void setLastMessageText(String lastMessageText) {
+        this.lastMessageText = lastMessageText;
+    }
+
+    public String getOtherUserImage() {
+        return otherUserImage;
+    }
+
+    public void setOtherUserImage(String otherUserImage) {
+        this.otherUserImage = otherUserImage;
+    }
 
     public Long getId() {
         return id;
@@ -36,13 +53,6 @@ public class Conversation {
         this.lastMessageAt = lastMessageAt;
     }
 
-    public List<Long> getUserIds() {
-        return userIds;
-    }
-
-    public void setUserIds(List<Long> userIds) {
-        this.userIds = userIds;
-    }
 
     public String getOtherUserName() {
         return otherUserName;
