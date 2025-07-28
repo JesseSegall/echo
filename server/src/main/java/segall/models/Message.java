@@ -1,15 +1,29 @@
 package segall.models;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+
 import java.time.LocalDateTime;
 
 public class Message {
     private Long id;
+    @NotNull(message = "Conversation ID is required")
+    @Positive(message = "Conversation ID must be positive")
     private Long conversationId;
+
+    @NotNull(message = "Sender ID is required")
+    @Positive(message = "Sender ID must be positive")
     private Long senderId;
+
+    @NotBlank(message = "Message body cannot be empty")
     private String body;
+
+    @NotNull(message = "Sent time is required")
+    private LocalDateTime sentAt;
     private String senderName;
     private String senderImage;
-    private LocalDateTime sentAt;
 
     public String getSenderName() {
         return senderName;
