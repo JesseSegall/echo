@@ -1,6 +1,6 @@
 package segall.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 import java.util.Objects;
 

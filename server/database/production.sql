@@ -166,4 +166,5 @@ INSERT INTO band (name, genre, city, state) VALUES
 ('Electronic Vibes', 'Electronic', 'Austin', 'TX');
 
 select * from `user`;
+select * from posts;
 SELECT * FROM songs;

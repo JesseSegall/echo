@@ -1,0 +1,7 @@
+@url = http://localhost:8080/api/posts
+
+GET {{url}}/user/3
+
+###
+
+DELETE {{url}}/2

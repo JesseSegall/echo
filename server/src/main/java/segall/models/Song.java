@@ -1,25 +1,22 @@
 package segall.models;
 
-import jakarta.validation.constraints.Min;
+
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
 
 import java.time.LocalDateTime;
-import java.util.Objects;
+
 
 public class Song {
     private Long id;
 
-    private Long   userId;            // ← new
+    private Long   userId;
     private Long   bandId;
 
     private Long albumId;
 
     @NotBlank(message = "Title is required")
     private String title;
-
-
-
 
     private String fileKey;
     private String fileUrl;
