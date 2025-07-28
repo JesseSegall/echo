@@ -30,6 +30,7 @@ export default function PostCard({
 	const [showComments, setShowComments] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editContent, setEditContent] = useState(body);
+	const [commentsCount, setCommentsCount] = useState(0);
 
 	// Determine if posted by user or band grab user or band info and set author to username or band name
 	const author = profileUser;
@@ -276,8 +277,7 @@ export default function PostCard({
 					</HStack>
 
 					<HStack spacing={3} color='gray.500' fontSize='sm'>
-						<Text>❤️ {post.likesCount || 0}</Text>
-						<Text>💬 {post.commentsCount || 0}</Text>
+						<Text>💬 {commentsCount}</Text>
 					</HStack>
 				</Flex>
 
@@ -288,6 +288,7 @@ export default function PostCard({
 							showComments={showComments}
 							loggedInUser={loggedInUser}
 							profileUser={profileUser}
+							onCommentsCountChange={setCommentsCount}
 						/>
 					</Collapsible.Content>
 				</Collapsible.Root>

@@ -11,23 +11,24 @@ export default function Comments({
 	const [newComment, setNewComment] = useState('');
 	const [comments, setComments] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [submitting, setSubmitting] = useState(false);
 
-	// useEffect(() => {
-	// 	if (showComments && post.id) {
-	// 		fetchComments();
-	// 	}
-	// }, [showComments, post.id]);
+	useEffect(() => {
+		if (showComments && post.id) {
+			fetchComments();
+		}
+	}, [showComments, post.id]);
 
-	// useEffect(() => {
-	// 	if (onCommentsCountChange) {
-	// 		onCommentsCountChange(comments.length);
-	// 	}
-	// }, [comments.length, onCommentsCountChange]);
+	useEffect(() => {
+		if (onCommentsCountChange) {
+			onCommentsCountChange(comments.length);
+		}
+	}, [comments.length, onCommentsCountChange]);
 
 	const fetchComments = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch(`http://localhost:8080/api/posts/${post.id}/comments`, {
+			const response = await fetch(`http://localhost:8080/api/comments/${post.id}`, {
 				headers: {
 					Authorization: loggedInUser?.jwt,
 				},
@@ -35,6 +36,7 @@ export default function Comments({
 
 			if (response.ok) {
 				const commentsData = await response.json();
+				console.log('Comments with author info:', commentsData);
 				setComments(commentsData);
 			} else {
 				console.error('Failed to fetch comments');
@@ -49,29 +51,56 @@ export default function Comments({
 	const handleAddComment = async () => {
 		if (!newComment.trim()) return;
 
+		setSubmitting(true); // Start loading
 		try {
-			const response = await fetch(`http://localhost:8080/api/posts/${post.id}/comments`, {
+			const response = await fetch(`http://localhost:8080/api/comments/${post.id}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: loggedInUser?.jwt,
 				},
-				body: JSON.stringify({ body: newComment }),
+				body: JSON.stringify({
+					userId: loggedInUser.id,
+					bandId: null,
+					body: newComment,
+				}),
 			});
 
 			if (response.ok) {
-				const newCommentData = await response.json();
-				setComments((prevComments) => [...prevComments, newCommentData]);
 				setNewComment('');
+				fetchComments();
 			} else {
-				console.error('Failed to add comment');
+				const errorText = await response.text();
+				console.error('Failed to add comment:', errorText);
 			}
 		} catch (error) {
 			console.error('Error adding comment:', error);
+		} finally {
+			setSubmitting(false);
 		}
 	};
 
 	if (!showComments) return null;
+
+	const getTimeAgo = (dateString) => {
+		const now = new Date();
+		const commentDate = new Date(dateString);
+		const diffInMs = now - commentDate;
+
+		const minutes = Math.floor(diffInMs / (1000 * 60));
+		const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+		const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+		if (minutes < 1) return 'just now';
+		if (minutes < 60) return `${minutes}m ago`;
+		if (hours < 24) return `${hours}h ago`;
+		if (days < 7) return `${days}d ago`;
+
+		return commentDate.toLocaleDateString(undefined, {
+			month: 'short',
+			day: 'numeric',
+		});
+	};
 
 	return (
 		<Box borderTop='2px solid' borderColor='gray.100' bg='gray.50' p={4}>
@@ -119,16 +148,23 @@ export default function Comments({
 						{comments.map((comment) => (
 							<HStack key={comment.id} align='start' spacing={3}>
 								<Avatar.Root size='sm'>
-									<Avatar.Image src={comment.user?.profileImgUrl || comment.band?.bandImgUrl} />
-									<Avatar.Fallback name={comment.user?.username || comment.band?.name} />
+									<Avatar.Image src={comment.authorImageUrl || ''} />
+									<Avatar.Fallback name={comment.authorName || 'User'} />
 								</Avatar.Root>
-								<VStack align='start' spacing={1} flex={1}>
-									<HStack spacing={2}>
+								<VStack
+									align='start'
+									spacing={1}
+									flex={1}
+									pb={3}
+									borderBottom='1px solid'
+									borderColor='gray.200'
+								>
+									<HStack spacing={2} width='100%' justify='space-between'>
 										<Text fontSize='sm' fontWeight='600' color='gray.700'>
-											{comment.user?.username || comment.band?.name}
+											{comment.authorName}
 										</Text>
 										<Text fontSize='xs' color='gray.500'>
-											{new Date(comment.createdAt).toLocaleDateString()}
+											{getTimeAgo(comment.createdAt)}
 										</Text>
 									</HStack>
 									<Text fontSize='sm' color='gray.800'>

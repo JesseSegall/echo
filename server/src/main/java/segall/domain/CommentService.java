@@ -67,8 +67,11 @@ public class CommentService {
     public List<Comment> getCommentsByBandId(Long bandId){
         return repository.getCommentsByBandId(bandId);
     }
+    public Comment getCommentById(Long id){
+        return repository.getCommentById(id);
+    }
 
-    int getCommentCountByPostId(Long postId){
+   public int getCommentCountByPostId(Long postId){
         return repository.getCommentCountByPostId(postId);
     }
 

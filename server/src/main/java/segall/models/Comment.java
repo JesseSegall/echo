@@ -10,6 +10,33 @@ public class Comment {
     private Long bandId;
     private String body;
     private LocalDateTime createdAt;
+    private String authorName;
+    private String authorImageUrl;
+    private String authorType;
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public String getAuthorImageUrl() {
+        return authorImageUrl;
+    }
+
+    public void setAuthorImageUrl(String authorImageUrl) {
+        this.authorImageUrl = authorImageUrl;
+    }
+
+    public String getAuthorType() {
+        return authorType;
+    }
+
+    public void setAuthorType(String authorType) {
+        this.authorType = authorType;
+    }
 
     public Long getId() {
         return id;
