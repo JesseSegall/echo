@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-
 public class CommentJdbcClientRepository implements CommentRepository{
     private final JdbcClient jdbcClient;
 

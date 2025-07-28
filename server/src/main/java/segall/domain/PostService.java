@@ -7,7 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.springframework.stereotype.Service;
 import segall.data.PostJdbcClientRepository;
 import segall.models.Post;
-import segall.models.User;
+
 
 import java.util.List;
 import java.util.Set;
