@@ -95,7 +95,7 @@ public class SongJdbcClientRepository implements SongRepository{
 
     @Override
     public boolean deleteById(Long id) {
-        final String sql = "delete from songs where id = ?";
+        final String sql = "delete from songs where id = ?;";
 
         return jdbcClient.sql(sql).param(id).update()>0;
     }

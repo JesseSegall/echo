@@ -51,7 +51,7 @@ export default function Comments({
 	const handleAddComment = async () => {
 		if (!newComment.trim()) return;
 
-		setSubmitting(true); // Start loading
+		setSubmitting(true);
 		try {
 			const response = await fetch(`http://localhost:8080/api/comments/${post.id}`, {
 				method: 'POST',
