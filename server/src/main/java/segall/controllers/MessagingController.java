@@ -95,4 +95,26 @@ public class MessagingController {
         Conversation conversation = service.findOrCreateConversation(userIdFromHeaders.longValue(), otherUserId);
         return new ResponseEntity<>(conversation, HttpStatus.OK);
     }
+    @DeleteMapping("/conversations/{conversationId}")
+    public ResponseEntity<Object> leaveConversation(
+            @PathVariable Long conversationId,
+            @RequestHeader Map<String, String> headers
+    ) {
+
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+
+        boolean removed = service.removeUserFromConversation(conversationId, userId.longValue());
+
+
+        if (removed) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

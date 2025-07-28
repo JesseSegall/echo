@@ -209,6 +209,29 @@ export default function UserProfile({ user: loggedInUser }) {
 		);
 	};
 
+	const handleMessageUser = async () => {
+		try {
+			const response = await fetch(
+				`http://localhost:8080/api/messages/conversations/with/${profileUser.id}`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: loggedInUser.jwt,
+					},
+				}
+			);
+
+			if (response.ok) {
+				const conversation = await response.json();
+
+				navigate(`/messages/{conversation.id}`);
+			}
+		} catch (error) {
+			console.error('Error starting conversation:', error);
+		}
+	};
+
 	const isOwnProfile = loggedInUser && profileUser && loggedInUser.id === profileUser.id;
 	if (!profileUser) return null;
 
@@ -293,6 +316,11 @@ export default function UserProfile({ user: loggedInUser }) {
 					)}
 
 					<HStack>
+						{!isOwnProfile && (
+							<Button size='sm' colorScheme='blue' variant='outline' onClick={handleMessageUser}>
+								Message
+							</Button>
+						)}
 						{isOwnProfile && !isEditingProfile && (
 							<Button
 								size='sm'
@@ -314,11 +342,6 @@ export default function UserProfile({ user: loggedInUser }) {
 								}}
 							>
 								Save Profile
-							</Button>
-						)}
-						{!isOwnProfile && (
-							<Button size='sm' colorScheme='blue' variant='outline'>
-								Message
 							</Button>
 						)}
 					</HStack>

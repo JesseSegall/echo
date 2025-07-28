@@ -73,6 +73,10 @@ public class MessagingService {
         return conversationRepository.getConversationsByUserId(userId);
     }
 
+    public boolean removeUserFromConversation(Long conversationId, Long userId){
+        return conversationRepository.removeUserFromConversation(conversationId,userId);
+    }
+
     public Conversation getConversation(Long conversationId) {
         return conversationRepository.getConversationById(conversationId);
     }

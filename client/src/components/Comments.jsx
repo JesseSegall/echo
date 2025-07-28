@@ -108,7 +108,7 @@ export default function Comments({
 			<VStack spacing={3} align='stretch'>
 				<HStack spacing={3}>
 					<Avatar.Root size='sm'>
-						<Avatar.Image src={profileUser?.profileImgUrl} />
+						<Avatar.Image src={loggedInUser?.profileImgUrl} />
 						<Avatar.Fallback name={profileUser?.username || 'Current User'} />
 					</Avatar.Root>
 					<Textarea

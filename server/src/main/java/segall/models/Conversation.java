@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public class Conversation {
     private Long id;
+    private Long otherUserId;
     private LocalDateTime createdAt;
     private LocalDateTime lastMessageAt;
 
@@ -12,6 +13,14 @@ public class Conversation {
     private String otherUserImage;
 
     private String lastMessageText;
+
+    public Long getOtherUserId() {
+        return otherUserId;
+    }
+
+    public void setOtherUserId(Long otherUserId) {
+        this.otherUserId = otherUserId;
+    }
 
     public String getLastMessageText() {
         return lastMessageText;

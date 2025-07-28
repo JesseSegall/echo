@@ -192,15 +192,7 @@ export default function AudioPlayer({ song, uploaderName }) {
 							variant='ghost'
 							color='gray.500'
 							_hover={{ color: 'gray.700', bg: 'gray.50' }}
-						>
-							<FaDownload />
-						</IconButton>
-					</HStack>
-
-					<HStack spacing={3} color='gray.500' fontSize='xs'>
-						<Text>👥 24</Text>
-						<Text>❤️ 12</Text>
-						<Text>💬 3</Text>
+						></IconButton>
 					</HStack>
 				</Flex>
 			</Card.Body>

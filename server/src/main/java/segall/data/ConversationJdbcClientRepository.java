@@ -23,23 +23,29 @@ public class ConversationJdbcClientRepository implements ConversationRepository{
     @Override
     public Conversation findOrCreateConversation(Long user1Id, Long user2Id) {
         final String sql = """
-        select c.* from conversations c
-        join conversation_users cu1 on c.id = cu1.conversation_id
-        join conversation_users cu2 on c.id = cu2.conversation_id
-        where (cu1.user_id = ? and cu2.user_id = ?)
-           or (cu1.user_id = ? and cu2.user_id = ?)
-        """;
+      select c.* from conversations c
+      join conversation_users cu1 on c.id = cu1.conversation_id
+      join conversation_users cu2 on c.id = cu2.conversation_id
+      where (cu1.user_id = ? and cu2.user_id = ?)
+         or (cu1.user_id = ? and cu2.user_id = ?)
+      """;
 
-        Optional<Conversation> existing = jdbcClient.sql(sql)
+
+        List<Conversation> existing = jdbcClient.sql(sql)
                 .param(user1Id).param(user2Id)
                 .param(user2Id).param(user1Id)
                 .query(Conversation.class)
-                .optional();
-
-        return existing.orElseGet(() -> createNewConversation(user1Id, user2Id));
+                .list();
 
 
+        if (!existing.isEmpty()) {
+            return existing.getFirst();
+        }
+
+
+        return createNewConversation(user1Id, user2Id);
     }
+
 
     private Conversation createNewConversation(Long user1Id, Long user2Id) {
 
@@ -88,19 +94,28 @@ public class ConversationJdbcClientRepository implements ConversationRepository{
     @Override
     public List<Conversation> getConversationsByUserId(Long userId) {
         final String sql = """
-                        select c.*,
-                               u.username as other_username, 
-                               u.profile_img_url as other_user_image,
-                               m.body as last_message_text
-                        from conversations c
-                        join conversation_users cu1 on c.id = cu1.conversation_id
-                        join conversation_users cu2 on c.id = cu2.conversation_id
-                        join user u on cu2.user_id = u.id
-                        left join messages m on c.last_message_at = m.sent_at and c.id = m.conversation_id
-                        where cu1.user_id = ? and cu2.user_id != ?
-                        order by c.last_message_at DESC
-                        """;
-        return jdbcClient.sql(sql).query(new ConversationMapper()).list();
+                              select c.*,
+                                     cu2.user_id      as other_user_id,
+                                     u.username       as other_username,
+                                     u.profile_img_url as other_user_image,
+                                     m.body           as last_message_text
+                              from conversations c
+                              join conversation_users cu1 on c.id = cu1.conversation_id
+                              join conversation_users cu2 on c.id = cu2.conversation_id
+                              join user u on u.id = cu2.user_id
+                              left join messages m on c.last_message_at = m.sent_at
+                                                  and c.id = m.conversation_id
+                              where cu1.user_id = ?
+                                and cu2.user_id != ?
+                              order by c.last_message_at desc
+                              """;
+
+        return jdbcClient
+                .sql(sql)
+                .param(userId)
+                .param(userId)
+                .query(new ConversationMapper())
+                .list();
     }
 
     @Override
@@ -108,6 +123,18 @@ public class ConversationJdbcClientRepository implements ConversationRepository{
         final String sql = "delete from conversations where id = ?";
         return jdbcClient.sql(sql).param(id).update()>0;
     }
+    public boolean removeUserFromConversation(Long conversationId, Long userId) {
+        String sql = """
+                      delete from conversation_users where conversation_id = ?
+                      and user_id = ?
+                      """;
+        return jdbcClient
+                .sql(sql)
+                .param(conversationId)
+                .param(userId)
+                .update() > 0;
+    }
+
 
     @Override
     public boolean isUserInConversation(Long userId, Long conversationId) {

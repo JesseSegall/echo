@@ -165,7 +165,11 @@ INSERT INTO band (name, genre, city, state) VALUES
 ('Jazz Collective', 'Jazz', 'Chicago', 'IL'),
 ('Electronic Vibes', 'Electronic', 'Austin', 'TX');
 
+
+
+
 select * from `user`;
 select * from posts;
 SELECT * FROM songs;
 select * from comments;
+select * from messages;

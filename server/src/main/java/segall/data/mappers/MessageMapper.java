@@ -16,7 +16,7 @@ public class MessageMapper implements RowMapper<Message> {
         message.setBody(rs.getString("body"));
         message.setSentAt(rs.getTimestamp("sent_at").toLocalDateTime());
         message.setSenderName(rs.getString("sender_name"));
-        message.setSenderImage("sender_image");
+        message.setSenderImage(rs.getString("sender_image"));
         return message;
     }
 }
