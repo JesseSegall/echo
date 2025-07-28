@@ -67,7 +67,7 @@ public class MessagingService {
         return result;
     }
 
-    // Conversation class methods
+    // Conversation class pass throughs
 
     public List<Conversation> getUserConversations(Long userId) {
         return conversationRepository.getConversationsByUserId(userId);
@@ -79,6 +79,9 @@ public class MessagingService {
 
     public Conversation findOrCreateConversation(Long user1Id, Long user2Id) {
         return conversationRepository.findOrCreateConversation(user1Id, user2Id);
+    }
+    public boolean isUserInConversation(Long userId, Long conversationId){
+        return conversationRepository.isUserInConversation(userId, conversationId);
     }
 
     public boolean deleteConversation(Long conversationId) {

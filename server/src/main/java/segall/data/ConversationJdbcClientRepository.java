@@ -108,4 +108,18 @@ public class ConversationJdbcClientRepository implements ConversationRepository{
         final String sql = "delete from conversations where id = ?";
         return jdbcClient.sql(sql).param(id).update()>0;
     }
+
+    @Override
+    public boolean isUserInConversation(Long userId, Long conversationId) {
+        final String sql = """
+                select count(*) from conversation_users
+                where conversation_id = ? and user_id = ?;
+                """;
+        int count = jdbcClient.sql(sql)
+                .param(conversationId)
+                .param(userId)
+                .query(Integer.class)
+                .optional().orElse(0);
+        return count > 0;
+    }
 }

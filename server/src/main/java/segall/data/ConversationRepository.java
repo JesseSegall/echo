@@ -9,4 +9,5 @@ public interface ConversationRepository {
     Conversation getConversationById(Long id);
     List<Conversation> getConversationsByUserId(Long userId);
     boolean deleteConversationById(Long id);
+    boolean isUserInConversation(Long userId, Long conversationId);
 }
