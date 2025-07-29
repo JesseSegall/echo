@@ -51,7 +51,7 @@ export default function Comments({
 	const handleAddComment = async () => {
 		if (!newComment.trim()) return;
 
-		setSubmitting(true); // Start loading
+		setSubmitting(true);
 		try {
 			const response = await fetch(`http://localhost:8080/api/comments/${post.id}`, {
 				method: 'POST',
@@ -108,7 +108,7 @@ export default function Comments({
 			<VStack spacing={3} align='stretch'>
 				<HStack spacing={3}>
 					<Avatar.Root size='sm'>
-						<Avatar.Image src={profileUser?.profileImgUrl} />
+						<Avatar.Image src={loggedInUser?.profileImgUrl} />
 						<Avatar.Fallback name={profileUser?.username || 'Current User'} />
 					</Avatar.Root>
 					<Textarea

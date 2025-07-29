@@ -10,16 +10,17 @@ import {
 	Card,
 	Avatar,
 	Badge,
+	Menu,
 } from '@chakra-ui/react';
 import Wavesurfer from '@wavesurfer/react';
-import { FaPlay, FaPause, FaHeart, FaShare, FaDownload } from 'react-icons/fa';
+import { FaPlay, FaPause, FaHeart, FaShare, FaEllipsisH, FaTrash } from 'react-icons/fa';
 
-export default function AudioPlayer({ song, uploaderName }) {
+export default function AudioPlayer({ song, uploaderName, loggedInUser, onDelete }) {
 	const [playing, setPlaying] = useState(false);
 	const [liked, setLiked] = useState(false);
 	const wavesurferRef = useRef(null);
 
-	const { title, fileUrl, createdAt, albumCoverUrl } = song;
+	const { id, title, fileUrl, createdAt, albumCoverUrl, userId } = song;
 	const coverSrc =
 		albumCoverUrl ||
 		'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop';
@@ -40,6 +41,8 @@ export default function AudioPlayer({ song, uploaderName }) {
 		}
 	};
 
+	const isOwner = loggedInUser?.id === userId;
+
 	return (
 		<Card.Root
 			overflow='hidden'
@@ -54,6 +57,7 @@ export default function AudioPlayer({ song, uploaderName }) {
 			w='full'
 			maxW='none'
 			mx='auto'
+			mb={4}
 		>
 			<Card.Body p={0}>
 				{/* Header Section */}
@@ -78,8 +82,39 @@ export default function AudioPlayer({ song, uploaderName }) {
 						py={1}
 						fontSize='xs'
 					>
-						{createdAt}
+						{uploadDate}
 					</Badge>
+
+					{isOwner && (
+						<Menu.Root>
+							<Menu.Trigger asChild>
+								<IconButton
+									aria-label='More options'
+									ml={2}
+									size='sm'
+									variant='ghost'
+									color='gray.500'
+									_hover={{ color: 'gray.700', bg: 'gray.50' }}
+								>
+									<FaEllipsisH />
+								</IconButton>
+							</Menu.Trigger>
+							<Menu.Positioner>
+								<Menu.Content>
+									<Menu.Item
+										onClick={() => onDelete(id)}
+										color='red.500'
+										_hover={{ color: 'red.700', bg: 'red.50' }}
+									>
+										<HStack spacing={2}>
+											<FaTrash />
+											<Text>Delete Song</Text>
+										</HStack>
+									</Menu.Item>
+								</Menu.Content>
+							</Menu.Positioner>
+						</Menu.Root>
+					)}
 				</Flex>
 
 				{/* Main Player Section */}
@@ -123,8 +158,6 @@ export default function AudioPlayer({ song, uploaderName }) {
 						<Text fontSize='md' fontWeight='600' color='gray.800' isTruncated lineHeight='1.2'>
 							{title}
 						</Text>
-
-						{/* Waveform Container */}
 						<Box
 							height='60px'
 							borderRadius='8px'
@@ -186,21 +219,6 @@ export default function AudioPlayer({ song, uploaderName }) {
 						>
 							<FaShare />
 						</IconButton>
-						<IconButton
-							aria-label='Download'
-							size='sm'
-							variant='ghost'
-							color='gray.500'
-							_hover={{ color: 'gray.700', bg: 'gray.50' }}
-						>
-							<FaDownload />
-						</IconButton>
-					</HStack>
-
-					<HStack spacing={3} color='gray.500' fontSize='xs'>
-						<Text>👥 24</Text>
-						<Text>❤️ 12</Text>
-						<Text>💬 3</Text>
 					</HStack>
 				</Flex>
 			</Card.Body>

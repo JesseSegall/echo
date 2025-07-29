@@ -154,6 +154,7 @@ export default function UserProfile({ user: loggedInUser }) {
 			if (contentType && contentType.includes('application/json')) {
 				const newSong = await res.json();
 				setSongs((prev) => [...prev, newSong]);
+				setSelectedFileName('');
 			} else {
 				// This is so no error gets thrown if it returns an empty response
 				console.log('Upload successful but no JSON response');
@@ -169,8 +170,8 @@ export default function UserProfile({ user: loggedInUser }) {
 		try {
 			const payload = {
 				body: newPostContent,
-				userId: profileUser.id, // Add userId
-				bandId: null, // Explicitly set bandId to null
+				userId: profileUser.id,
+				bandId: null,
 			};
 
 			console.log('Sending payload:', payload);
@@ -207,6 +208,46 @@ export default function UserProfile({ user: loggedInUser }) {
 		setPosts((prevPosts) =>
 			prevPosts.map((post) => (post.id === postId ? { ...post, body: newContent } : post))
 		);
+	};
+
+	const handleMessageUser = async () => {
+		try {
+			const response = await fetch(
+				`http://localhost:8080/api/messages/conversations/with/${profileUser.id}`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: loggedInUser.jwt,
+					},
+				}
+			);
+
+			if (response.ok) {
+				const conversation = await response.json();
+
+				navigate(`/messages/{conversation.id}`);
+			}
+		} catch (error) {
+			console.error('Error starting conversation:', error);
+		}
+	};
+	const handleDeleteSong = async (songId) => {
+		try {
+			const res = await fetch(`http://localhost:8080/api/user/songs/${songId}`, {
+				method: 'DELETE',
+				headers: {
+					Authorization: loggedInUser.jwt,
+				},
+			});
+			if (res.ok) {
+				setSongs((prev) => prev.filter((song) => song.id !== songId));
+			} else {
+				console.error('Failed to delete song', await res.text());
+			}
+		} catch (err) {
+			console.error('Error deleting song:', err);
+		}
 	};
 
 	const isOwnProfile = loggedInUser && profileUser && loggedInUser.id === profileUser.id;
@@ -293,6 +334,11 @@ export default function UserProfile({ user: loggedInUser }) {
 					)}
 
 					<HStack>
+						{!isOwnProfile && (
+							<Button size='sm' colorScheme='blue' variant='outline' onClick={handleMessageUser}>
+								Message
+							</Button>
+						)}
 						{isOwnProfile && !isEditingProfile && (
 							<Button
 								size='sm'
@@ -314,11 +360,6 @@ export default function UserProfile({ user: loggedInUser }) {
 								}}
 							>
 								Save Profile
-							</Button>
-						)}
-						{!isOwnProfile && (
-							<Button size='sm' colorScheme='blue' variant='outline'>
-								Message
 							</Button>
 						)}
 					</HStack>
@@ -504,10 +545,46 @@ export default function UserProfile({ user: loggedInUser }) {
 				<Heading size='md' mb={4}>
 					Songs
 				</Heading>
+
+				{/* Show upload UI when editing profile */}
+				{isOwnProfile && isEditingProfile && (
+					<Box
+						border='2px dashed'
+						borderColor='gray.300'
+						borderRadius='md'
+						p={4}
+						mb={6}
+						textAlign='center'
+					>
+						<Text mb={2}>Upload a New Song</Text>
+						{selectedFileName && <Text mb={2}>{selectedFileName}</Text>}
+
+						<input
+							ref={fileInputRef}
+							type='file'
+							accept='audio/*'
+							style={{ display: 'none' }}
+							onChange={(e) => setSelectedFileName(e.target.files[0]?.name || '')}
+						/>
+						<Button mr={3} onClick={() => fileInputRef.current.click()}>
+							Select File
+						</Button>
+						<Button colorScheme='green' onClick={handleUploadSong} isDisabled={!selectedFileName}>
+							Upload Song
+						</Button>
+					</Box>
+				)}
+
 				{songs.length > 0 ? (
-					<VStack spacing={4}>
-						{songs.map((s) => (
-							<AudioPlayer key={s.id} song={s} uploaderName={profileUser.username} />
+					<VStack spacing={4} align='stretch'>
+						{songs.map((song) => (
+							<AudioPlayer
+								key={song.id}
+								song={song}
+								uploaderName={profileUser.username}
+								loggedInUser={loggedInUser}
+								onDelete={handleDeleteSong}
+							/>
 						))}
 					</VStack>
 				) : (
@@ -518,41 +595,8 @@ export default function UserProfile({ user: loggedInUser }) {
 						p={8}
 						textAlign='center'
 					>
-						{isEditingProfile && isOwnProfile ? (
-							<>
-								<Text mb={2}>No songs yet—upload your first track!</Text>
-
-								{selectedFileName && (
-									<Text mb={2} color='gray.700'>
-										Selected: {selectedFileName}
-									</Text>
-								)}
-
-								<input
-									ref={fileInputRef}
-									type='file'
-									accept='audio/*'
-									style={{ display: 'none' }}
-									onChange={(e) => {
-										const f = e.target.files[0];
-										setSelectedFileName(f ? f.name : '');
-									}}
-								/>
-
-								<Button
-									onClick={() => {
-										setSelectedFileName('');
-										fileInputRef.current.click();
-									}}
-									colorScheme='blue'
-									mr={2}
-								>
-									Select File
-								</Button>
-								<Button onClick={handleUploadSong} colorScheme='green'>
-									Upload Song
-								</Button>
-							</>
+						{isOwnProfile && !isEditingProfile ? (
+							<Text color='gray.500'>You haven't uploaded any songs yet.</Text>
 						) : (
 							<Text color='gray.500'>This user hasn’t uploaded any songs yet.</Text>
 						)}
