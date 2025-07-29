@@ -1,151 +1,257 @@
+'use client';
+
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-	Box,
 	Progress,
-	Heading,
-	FormControl,
-	FormLabel,
-	Input,
-	Select,
-	Textarea,
-	Checkbox,
-	ButtonGroup,
+	Box,
+	Group,
 	Button,
+	Heading,
 	Flex,
+	Field,
+	Input,
+	NativeSelect,
+	InputGroup,
+	Text,
 } from '@chakra-ui/react';
 
-export default function BandSignUpForm({ onSubmit }) {
+const Form1 = ({ username, setUsername, email, setEmail, password, setPassword }) => {
+	const [show, setShow] = useState(false);
+	const handleClick = () => setShow(!show);
+
+	return (
+		<>
+			<Heading w='100%' textAlign={'center'} fontWeight='normal' mb='2%'>
+				Account Information
+			</Heading>
+
+			<Field.Root mb='4%'>
+				<Field.Label fontWeight={'normal'}>Username</Field.Label>
+				<Input
+					placeholder='Choose a username'
+					value={username}
+					onChange={(e) => setUsername(e.target.value)}
+				/>
+			</Field.Root>
+
+			<Field.Root mb='4%'>
+				<Field.Label fontWeight={'normal'}>Email address</Field.Label>
+				<Input
+					type='email'
+					placeholder='you@example.com'
+					value={email}
+					onChange={(e) => setEmail(e.target.value)}
+				/>
+				<Field.HelperText>We'll never share your email.</Field.HelperText>
+			</Field.Root>
+
+			<Field.Root>
+				<Field.Label fontWeight={'normal'}>Password</Field.Label>
+				<InputGroup>
+					<Input
+						type={show ? 'text' : 'password'}
+						placeholder='Enter password'
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+					/>
+				</InputGroup>
+				<Button size='sm' onClick={handleClick} variant='ghost' mt={2} alignSelf='flex-start'>
+					{show ? 'Hide' : 'Show'}
+				</Button>
+			</Field.Root>
+		</>
+	);
+};
+
+const Form2 = ({ bandName, setBandName, genre, setGenre }) => {
+	return (
+		<>
+			<Heading w='100%' textAlign={'center'} fontWeight='normal' mb='2%'>
+				Band Details
+			</Heading>
+
+			<Field.Root mb='4%'>
+				<Field.Label fontWeight={'normal'}>Band Name</Field.Label>
+				<Input
+					placeholder="Your band's name"
+					value={bandName}
+					onChange={(e) => setBandName(e.target.value)}
+				/>
+			</Field.Root>
+
+			<Field.Root mb='4%'>
+				<Field.Label fontWeight={'normal'}>Genre</Field.Label>
+				<NativeSelect.Root>
+					<NativeSelect.Field
+						placeholder='Select genre'
+						value={genre}
+						onChange={(e) => setGenre(e.target.value)}
+					>
+						<option value=''>Select a genre</option>
+						<option value='rock'>Rock</option>
+						<option value='jazz'>Jazz</option>
+						<option value='electronic'>Electronic</option>
+						<option value='pop'>Pop</option>
+						<option value='hip-hop'>Hip Hop</option>
+						<option value='country'>Country</option>
+						<option value='classical'>Classical</option>
+						<option vlaue='metal'>Metal</option>
+						<option value='folk'>Folk</option>
+						<option value='blues'>Blues</option>
+						<option value='reggae'>Reggae</option>
+						<option value='other'>Other</option>
+					</NativeSelect.Field>
+					<NativeSelect.Indicator />
+				</NativeSelect.Root>
+			</Field.Root>
+		</>
+	);
+};
+
+export default function BandSignUpForm() {
+	const navigate = useNavigate();
 	const [step, setStep] = useState(1);
 	const [progress, setProgress] = useState(33.33);
 
-	// Step 1 state
-	const [name, setName] = useState('');
+	// form fields
+	const [username, setUsername] = useState('');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [bandName, setBandName] = useState('');
 	const [genre, setGenre] = useState('');
-	const [bandImgUrl, setBandImgUrl] = useState('');
 
-	// Step 2 state
-	const [city, setCity] = useState('');
-	const [state, setState] = useState('');
-	const [zip, setZip] = useState('');
-
-	// Step 3 state
-	const [bio, setBio] = useState('');
-	const [needsNewMember, setNeedsNewMember] = useState(false);
-
-	const next = () => {
-		setStep((s) => Math.min(3, s + 1));
-		setProgress((p) => Math.min(100, p + 33.33));
-	};
-	const back = () => {
-		setStep((s) => Math.max(1, s - 1));
-		setProgress((p) => Math.max(33.33, p - 33.33));
-	};
-	const submit = () => {
-		onSubmit({ name, genre, bandImgUrl, city, state, zip, bio, needsNewMember });
+	const handleNext = () => {
+		if (step === 1) {
+			setStep(2);
+			setProgress(66.66);
+		}
 	};
 
+	const handleBack = () => {
+		if (step === 2) {
+			setStep(1);
+			setProgress(33.33);
+		}
+	};
+
+	const handleSubmit = async () => {
+		try {
+			// create user first
+			const userRes = await fetch('http://localhost:8080/api/user', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, email, password }),
+			});
+			if (!userRes.ok) {
+				const errs = await userRes.json();
+				alert('User signup failed: ' + errs.join(', '));
+				return;
+			}
+			const createdUser = await userRes.json();
+
+			//  authenticate to get JWT
+			const authRes = await fetch('http://localhost:8080/api/user/authenticate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, password }),
+			});
+			if (!authRes.ok) {
+				alert('Authentication failed after signup');
+				return;
+			}
+			const { jwt } = await authRes.json();
+
+			//  create band with Authorization header so we can pass the user info into the create band method
+			const bandRes = await fetch('http://localhost:8080/api/band', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: jwt,
+				},
+				body: JSON.stringify({ name: bandName, genre }),
+			});
+			if (!bandRes.ok) {
+				const errs = await bandRes.json();
+				alert('Band creation failed: ' + errs.join(', '));
+				return;
+			}
+
+			alert('Band and account created! Please log in.');
+			navigate('/login');
+		} catch (e) {
+			console.error(e);
+			alert('Network error. Please try again.');
+		}
+	};
 	return (
-		<Box maxW='600px' mx='auto' p={6} borderWidth='1px' borderRadius='md'>
-			<Progress value={progress} mb={4} hasStripe isAnimated />
+		<>
+			<Box
+				borderWidth='1px'
+				rounded='lg'
+				shadow='1px 1px 3px rgba(0,0,0,0.3)'
+				maxWidth={600}
+				p={6}
+				m='10px auto'
+				as='form'
+			>
+				{/* Progress Bar */}
+				<Progress.Root value={progress} mb='5%' mx='5%' striped animated>
+					<Progress.Track>
+						<Progress.Range />
+					</Progress.Track>
+				</Progress.Root>
 
-			{step === 1 && (
-				<>
-					<Heading size='md' mb={4}>
-						Band Basics
-					</Heading>
-					<FormControl isRequired mb={3}>
-						<FormLabel>Band Name</FormLabel>
-						<Input value={name} onChange={(e) => setName(e.target.value)} />
-					</FormControl>
-					<FormControl isRequired mb={3}>
-						<FormLabel>Genre</FormLabel>
-						<Select
-							placeholder='Select genre'
-							value={genre}
-							onChange={(e) => setGenre(e.target.value)}
-						>
-							<option>Rock</option>
-							<option>Jazz</option>
-							<option>Metal</option>
-							<option>Rap</option>
-							<option>Electronic</option>
-							<option>Country</option>
-						</Select>
-					</FormControl>
-					<FormControl mb={6}>
-						<FormLabel>Band Image URL (optional)</FormLabel>
-						<Input
-							value={bandImgUrl}
-							onChange={(e) => setBandImgUrl(e.target.value)}
-							placeholder='https://...'
-						/>
-					</FormControl>
-				</>
-			)}
+				{/* Header */}
+				<Heading textAlign='center' mb={6} size='xl'>
+					Band Registration
+				</Heading>
 
-			{step === 2 && (
-				<>
-					<Heading size='md' mb={4}>
-						Location
-					</Heading>
-					<FormControl isRequired mb={3}>
-						<FormLabel>City</FormLabel>
-						<Input value={city} onChange={(e) => setCity(e.target.value)} />
-					</FormControl>
-					<FormControl isRequired mb={3}>
-						<FormLabel>State / Province</FormLabel>
-						<Input value={state} onChange={(e) => setState(e.target.value)} />
-					</FormControl>
-					<FormControl mb={6}>
-						<FormLabel>ZIP / Postal</FormLabel>
-						<Input value={zip} onChange={(e) => setZip(e.target.value)} />
-					</FormControl>
-				</>
-			)}
-
-			{step === 3 && (
-				<>
-					<Heading size='md' mb={4}>
-						More About Your Band
-					</Heading>
-					<FormControl mb={3}>
-						<FormLabel>Bio (optional)</FormLabel>
-						<Textarea
-							value={bio}
-							onChange={(e) => setBio(e.target.value)}
-							placeholder='Tell folks who you are…'
-							rows={4}
-						/>
-					</FormControl>
-					<FormControl mb={6}>
-						<Checkbox
-							isChecked={needsNewMember}
-							onChange={(e) => setNeedsNewMember(e.target.checked)}
-						>
-							We’re looking for new members
-						</Checkbox>
-					</FormControl>
-				</>
-			)}
-
-			<ButtonGroup mt={4} w='100%' justifyContent='space-between'>
-				<Flex>
-					<Button onClick={back} isDisabled={step === 1} colorScheme='teal' mr={2}>
-						Back
-					</Button>
-					{step < 3 && (
-						<Button onClick={next} colorScheme='teal' variant='outline'>
-							Next
-						</Button>
-					)}
-				</Flex>
-
-				{step === 3 && (
-					<Button colorScheme='red' onClick={submit}>
-						Create Band
-					</Button>
+				{/* Form Steps */}
+				{step === 1 ? (
+					<Form1
+						username={username}
+						setUsername={setUsername}
+						email={email}
+						setEmail={setEmail}
+						password={password}
+						setPassword={setPassword}
+					/>
+				) : (
+					<Form2 bandName={bandName} setBandName={setBandName} genre={genre} setGenre={setGenre} />
 				)}
-			</ButtonGroup>
-		</Box>
+
+				{/* Navigation Buttons */}
+				<Group mt='5%' w='100%'>
+					<Flex w='100%' justifyContent='space-between'>
+						<Flex gap={2}>
+							<Button
+								onClick={handleBack}
+								disabled={step === 1}
+								colorPalette='teal'
+								variant='solid'
+								w='7rem'
+							>
+								Back
+							</Button>
+							<Button
+								w='7rem'
+								disabled={step === 2}
+								onClick={handleNext}
+								colorPalette='teal'
+								variant='outline'
+							>
+								Next
+							</Button>
+						</Flex>
+						{step === 2 ? (
+							<Button w='7rem' colorPalette='red' variant='solid' onClick={handleSubmit}>
+								Submit
+							</Button>
+						) : null}
+					</Flex>
+				</Group>
+			</Box>
+		</>
 	);
 }
