@@ -14,6 +14,7 @@ import segall.models.BandMember;
 import segall.storage.StorageService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -108,6 +109,16 @@ public class BandService {
 
     public boolean deleteById(Long bandId){
         return bandRepository.deleteById(bandId);
+    }
+
+    // Band member methods
+
+    public List<BandMember> findAllMembersByBandId(Long bandId){
+        return bandMemberRepository.findAllMembersByBandId(bandId);
+    }
+
+    public boolean removeMember(Long bandId, Long userId){
+        return bandMemberRepository.removeMember(bandId,userId);
     }
 
 
