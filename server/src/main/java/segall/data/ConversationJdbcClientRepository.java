@@ -94,21 +94,29 @@ public class ConversationJdbcClientRepository implements ConversationRepository{
     @Override
     public List<Conversation> getConversationsByUserId(Long userId) {
         final String sql = """
-                              select c.*,
-                                     cu2.user_id      as other_user_id,
-                                     u.username       as other_username,
-                                     u.profile_img_url as other_user_image,
-                                     m.body           as last_message_text
-                              from conversations c
-                              join conversation_users cu1 on c.id = cu1.conversation_id
-                              join conversation_users cu2 on c.id = cu2.conversation_id
-                              join user u on u.id = cu2.user_id
-                              left join messages m on c.last_message_at = m.sent_at
-                                                  and c.id = m.conversation_id
-                              where cu1.user_id = ?
-                                and cu2.user_id != ?
+                               select
+                                c.id,
+                                c.created_at,
+                                c.last_message_at,
+                                cu2.user_id        as other_user_id,
+                                u.username         as other_username,
+                                u.profile_img_url  as other_user_image,
+                                m.body             as last_message_text
+                              from conversation_users cu1
+                              join conversations c
+                                on c.id = cu1.conversation_id
+                               and cu1.user_id  = ?
+                               and cu1.archived = false
+                              left join conversation_users cu2
+                                on cu2.conversation_id = c.id
+                               and cu2.user_id <> ?
+                              left join user u
+                                on u.id = cu2.user_id
+                              left join messages m
+                                on m.conversation_id = c.id
+                               and m.sent_at = c.last_message_at
                               order by c.last_message_at desc
-                              """;
+                         """;
 
         return jdbcClient
                 .sql(sql)
@@ -118,20 +126,37 @@ public class ConversationJdbcClientRepository implements ConversationRepository{
                 .list();
     }
 
+
     @Override
     public boolean deleteConversationById(Long id) {
         final String sql = "delete from conversations where id = ?";
         return jdbcClient.sql(sql).param(id).update()>0;
     }
+    @Override
     public boolean removeUserFromConversation(Long conversationId, Long userId) {
-        String sql = """
-                      delete from conversation_users where conversation_id = ?
-                      and user_id = ?
-                      """;
+            String sql = """
+                            update conversation_users
+                            set archived = true
+                            where conversation_id = ?
+                            and user_id         = ?
+                        """;
         return jdbcClient
                 .sql(sql)
                 .param(conversationId)
                 .param(userId)
+                .update() > 0;
+    }
+
+    @Override
+    public boolean unarchiveConversationForAll(Long conversationId) {
+        String sql = """
+                    update conversation_users
+                    set archived = false
+                    where conversation_id = ?
+                    """;
+        return jdbcClient
+                .sql(sql)
+                .param(conversationId)
                 .update() > 0;
     }
 

@@ -46,8 +46,8 @@ public class UserController {
             @PathVariable Long userId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
-            @RequestHeader Map<String, String> headers,
-            BindingResult bindingResult) {
+            @RequestHeader Map<String, String> headers
+            ) {
 
 
         Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
@@ -67,10 +67,11 @@ public class UserController {
 
 
         Result<Song> result = songService.addUserSong(file, userId, title);
-        result.getpayload().setCreatedAt(LocalDateTime.now());
+
         if (!result.isSuccess()) {
             return ResponseEntity.badRequest().body(result.getErrorMessages());
         }
+        result.getpayload().setCreatedAt(LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(result.getpayload());
     }
 

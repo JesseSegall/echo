@@ -59,6 +59,8 @@ public class MessagingService {
 
             Message savedMessage = messageRepository.addMessage(message);
             result.setpayload(savedMessage);
+            // This is so if one user deletes a conversation and another user starts it again, it will show up
+            conversationRepository.unarchiveConversationForAll(conversation.getId());
 
         } catch (Exception e) {
             result.addErrorMessage("Failed to send message", ResultType.INVALID);

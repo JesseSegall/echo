@@ -96,6 +96,36 @@ export default function MessageCenter({ loggedInUser }) {
 			sendMessage();
 		}
 	};
+	const handleDeleteConversation = async (conversationId) => {
+		try {
+			const res = await fetch(
+				`http://localhost:8080/api/messages/conversations/${conversationId}`,
+				{
+					method: 'DELETE',
+					headers: {
+						Authorization: loggedInUser.jwt,
+					},
+				}
+			);
+
+			if (res.status === 204) {
+				// removed successfully → update local state
+				setConversations((prev) => prev.filter((c) => c.id !== conversationId));
+				// clear the view if you had it selected
+				if (selectedConversation?.id === conversationId) {
+					setSelectedConversation(null);
+				}
+			} else if (res.status === 404) {
+				console.warn('Conversation not found or already deleted');
+			} else if (res.status === 401) {
+				console.error('Not authorized');
+			} else {
+				console.error('Failed to delete conversation', await res.text());
+			}
+		} catch (error) {
+			console.error('Error deleting conversation:', error);
+		}
+	};
 
 	return (
 		<Flex h='80vh' bg='white' borderRadius='lg' overflow='hidden' boxShadow='lg'>
@@ -114,6 +144,7 @@ export default function MessageCenter({ loggedInUser }) {
 								conversation={convo}
 								isSelected={selectedConversation?.id === convo.id}
 								onClick={() => setSelectedConversation(convo)}
+								onDelete={() => handleDeleteConversation(convo.id)}
 							/>
 						))
 					) : (
@@ -135,7 +166,7 @@ export default function MessageCenter({ loggedInUser }) {
 							<HStack spacing={3}>
 								<Avatar.Root size='sm'>
 									<Avatar.Image src={selectedConversation.otherUserImage} />
-									<Avatar.Fallback name={selectedConversation.otherUsername} />
+									<Avatar.Fallback name={selectedConversation.otherUsername || 'Deleted User'} />
 								</Avatar.Root>
 								<Text fontSize='md' fontWeight='600'>
 									{selectedConversation.otherUsername}

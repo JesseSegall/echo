@@ -1,6 +1,6 @@
 import { Box, HStack, VStack, Text, Avatar, IconButton, Menu } from '@chakra-ui/react';
 import { FaEllipsisH, FaTrash } from 'react-icons/fa';
-export default function ConversationItem({ conversation, isSelected, onClick }) {
+export default function ConversationItem({ conversation, isSelected, onClick, onDelete }) {
 	const getTimeAgo = (dateString) => {
 		if (!dateString) return '';
 		const now = new Date();
@@ -20,9 +20,6 @@ export default function ConversationItem({ conversation, isSelected, onClick }) 
 			month: 'short',
 			day: 'numeric',
 		});
-	};
-	const handleDeletePost = () => {
-		console.log('deleted');
 	};
 
 	return (
@@ -69,7 +66,10 @@ export default function ConversationItem({ conversation, isSelected, onClick }) 
 					<Menu.Positioner>
 						<Menu.Content>
 							<Menu.Item
-								onClick={handleDeletePost}
+								onClick={(e) => {
+									e.stopPropagation();
+									onDelete();
+								}}
 								color='red.500'
 								_hover={{ color: 'red.700', bg: 'red.50' }}
 							>

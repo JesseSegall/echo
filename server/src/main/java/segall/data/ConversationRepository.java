@@ -11,4 +11,5 @@ public interface ConversationRepository {
     boolean deleteConversationById(Long id);
     boolean isUserInConversation(Long userId, Long conversationId);
     boolean removeUserFromConversation(Long conversationId, Long userId);
+    boolean unarchiveConversationForAll(Long conversationId);
 }

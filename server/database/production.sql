@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS `conversation_users` (
   `conversation_id` INT NOT NULL,
   `user_id` INT NOT NULL,
   `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `archived`  BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`conversation_id`,`user_id`),
   CONSTRAINT `cu_conv_fk` FOREIGN KEY (`conversation_id`) REFERENCES `conversations`(`id`) ON DELETE CASCADE,
   CONSTRAINT `cu_user_fk` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE
@@ -173,3 +174,4 @@ select * from posts;
 SELECT * FROM songs;
 select * from comments;
 select * from messages;
+select * from conversations;

@@ -106,7 +106,6 @@ public class MessagingController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-
         boolean removed = service.removeUserFromConversation(conversationId, userId.longValue());
 
 

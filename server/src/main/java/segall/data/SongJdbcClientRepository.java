@@ -90,7 +90,7 @@ public class SongJdbcClientRepository implements SongRepository{
             return null;
         }
         song.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        return null;
+        return song;
     }
 
     @Override
