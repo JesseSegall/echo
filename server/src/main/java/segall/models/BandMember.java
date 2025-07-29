@@ -8,6 +8,13 @@ public class BandMember {
     private String role;
     private LocalDateTime joinedAt;
 
+    public BandMember() { }
+
+    public BandMember(Long bandId, Long userId, String role) {
+        this.bandId = bandId;
+        this.userId = userId;
+        this.role   = role;
+    }
     public Long getBandId() {
         return bandId;
     }

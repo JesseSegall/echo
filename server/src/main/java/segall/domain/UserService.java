@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.util.Set;
 @Service
 public class UserService {
-    UserRepository repository;
-    StorageService storageService;
+    private final UserRepository repository;
+    private final StorageService storageService;
 
     public UserService(UserRepository repository, StorageService storageService) {
         this.repository = repository;
