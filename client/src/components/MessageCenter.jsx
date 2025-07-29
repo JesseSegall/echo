@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Box, HStack, VStack, Text, Flex, Avatar, Textarea, IconButton } from '@chakra-ui/react';
-import { FaPaperPlane } from 'react-icons/fa';
+import { FaPaperPlane, FaArrowLeft } from 'react-icons/fa';
 import ConversationItem from './ConversationItem';
 import MessageBubble from './MessageBubble';
 
 export default function MessageCenter({ loggedInUser }) {
 	const { conversationId } = useParams();
 	const initialConversationId = conversationId ? Number(conversationId) : null;
+
+	const navigate = useNavigate();
 
 	const [conversations, setConversations] = useState([]);
 	const [selectedConversation, setSelectedConversation] = useState(null);
@@ -109,9 +111,8 @@ export default function MessageCenter({ loggedInUser }) {
 			);
 
 			if (res.status === 204) {
-				// removed successfully → update local state
 				setConversations((prev) => prev.filter((c) => c.id !== conversationId));
-				// clear the view if you had it selected
+
 				if (selectedConversation?.id === conversationId) {
 					setSelectedConversation(null);
 				}
@@ -126,6 +127,8 @@ export default function MessageCenter({ loggedInUser }) {
 			console.error('Error deleting conversation:', error);
 		}
 	};
+	console.log('Selected Conversation', selectedConversation);
+	console.log('Logged in User message center', loggedInUser);
 
 	return (
 		<Flex h='80vh' bg='white' borderRadius='lg' overflow='hidden' boxShadow='lg'>
@@ -163,15 +166,24 @@ export default function MessageCenter({ loggedInUser }) {
 					<>
 						{/* Header */}
 						<Box p={4} borderBottom='1px solid' borderColor='gray.200'>
-							<HStack spacing={3}>
-								<Avatar.Root size='sm'>
-									<Avatar.Image src={selectedConversation.otherUserImage} />
-									<Avatar.Fallback name={selectedConversation.otherUsername || 'Deleted User'} />
-								</Avatar.Root>
-								<Text fontSize='md' fontWeight='600'>
-									{selectedConversation.otherUsername}
-								</Text>
-							</HStack>
+							<Flex align='center' justify='space-between'>
+								<HStack spacing={3}>
+									<Avatar.Root size='sm'>
+										<Avatar.Image src={selectedConversation.otherUserImage} />
+										<Avatar.Fallback name={selectedConversation.otherUserName || 'User'} />
+									</Avatar.Root>
+									<Text fontSize='md' fontWeight='600'>
+										{selectedConversation.otherUserName}
+									</Text>
+								</HStack>
+								{/* Maybe add this back button later, for now just click avatar 
+								<IconButton
+									aria-label='Back to profile'
+									onClick={() => navigate(`/profile/${loggedInUser.username}`)}
+								>
+									<FaArrowLeft />
+								</IconButton> */}
+							</Flex>
 						</Box>
 
 						{/* Messages */}
