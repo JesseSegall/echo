@@ -79,7 +79,7 @@ public class Band {
         this.zipcode = zipcode;
     }
 
-    public boolean isNeedsNewMember() {
+    public boolean getNeedsNewMember() {
         return needsNewMember;
     }
 
