@@ -151,7 +151,87 @@ public class BandController {
         return ResponseEntity.ok(bands);
     }
 
+    @PostMapping("/{bandId}/members")
+    public ResponseEntity<Object> addBandMember(
+            @PathVariable Long bandId,
+            @RequestBody Map<String, Long> request,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        Long userIdToAdd = request.get("userId");
+        if (userIdToAdd == null) {
+            return ResponseEntity.badRequest().body("User ID is required");
+        }
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(userIdFromHeaders.longValue()) && "owner".equals(m.getRole()));
+
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only add members to your own band");
+        }
+
+        boolean isAlreadyMember = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m -> m.getUserId().equals(userIdToAdd));
+
+        if (isAlreadyMember) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of this band");
+        }
+
+        BandMember newMember = new BandMember();
+        newMember.setBandId(bandId);
+        newMember.setUserId(userIdToAdd);
+        newMember.setRole("member");
+
+
+        BandMember addedMember = bandService.addBandMember(newMember);
+
+        if (addedMember != null) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(addedMember);
+        } else {
+            return ResponseEntity.badRequest().body("Failed to add member");
+        }
+    }
+
+    @DeleteMapping("/{bandId}/members/{userId}")
+    public ResponseEntity<Object> removeBandMember(
+            @PathVariable Long bandId,
+            @PathVariable Long userId,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(userIdFromHeaders.longValue()) && "owner".equals(m.getRole()));
+
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only remove members from your own band");
+        }
+
+
+        boolean removed = bandService.removeMember(bandId, userId);
+
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found in this band");
+        }
+    }
 
 
     @PostMapping(value = "/{bandId}/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -201,6 +281,38 @@ public class BandController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{bandId}/songs/{songId}")
+    public ResponseEntity<Object> deleteBandSong(
+            @PathVariable Long bandId,
+            @PathVariable Long songId,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(userIdFromHeaders.longValue()) && "owner".equals(m.getRole()));
+
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
+        boolean deleted = songService.deleteById(songId).isSuccess();
+
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUser } from '../context/UserContext';
 import {
 	Box,
 	HStack,
@@ -23,6 +24,7 @@ export default function PostCard({
 	loggedInUser,
 	onPostDeleted,
 	onPostUpdated,
+	isOwnProfile = false,
 }) {
 	const { body, createdAt, userId, bandId } = post;
 
@@ -36,9 +38,15 @@ export default function PostCard({
 	const author = profileUser;
 	const authorType = userId ? 'user' : 'band';
 
-	const isOwnPost =
-		loggedInUser &&
-		((userId && loggedInUser.id === userId) || (bandId && loggedInUser.bandId === bandId));
+	const isOwnPost = Boolean(
+		// user post authored by me
+		(userId && loggedInUser?.id === userId) ||
+			// band post on my band’s page
+			(bandId && isOwnProfile)
+	);
+	console.log('isOwnPost in post', isOwnPost);
+	console.log('loggedInUser', loggedInUser);
+	console.log('bandId', bandId);
 
 	const uploadDate = createdAt
 		? new Date(createdAt).toLocaleDateString(undefined, {

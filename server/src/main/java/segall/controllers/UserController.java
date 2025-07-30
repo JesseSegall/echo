@@ -144,6 +144,31 @@ public class UserController {
 
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+    @GetMapping("/id/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = service.findById(id);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(user);
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<User>> searchUsers(
+            @RequestParam String query,
+            @RequestHeader Map<String, String> headers) {
+
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        if (query == null || query.trim().length() < 2) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<User> users = service.searchUsers(query.trim(), userIdFromHeaders.longValue());
+        return ResponseEntity.ok(users);
+    }
 
     @PutMapping( "/{id}")
     public ResponseEntity<Object> update(

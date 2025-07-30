@@ -238,6 +238,7 @@ export default function UserProfile() {
 				onDeleteSong={handleDeleteSong}
 				fileInputRef={fileInputRef}
 				uploaderImage={profileUser.profileImgUrl}
+				loggedInUser={user}
 			/>
 
 			<PostsSection

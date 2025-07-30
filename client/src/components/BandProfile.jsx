@@ -187,12 +187,57 @@ export default function BandProfile() {
 			navigate(`/messages?conversationId=${convo.id}`);
 		}
 	};
+	const handleAddMember = async (userId) => {
+		try {
+			const response = await fetch(`http://localhost:8080/api/band/${bandId}/members`);
+			if (response.ok) {
+				const updatedMembers = await response.json();
+				setMembers(updatedMembers);
+			}
+		} catch (error) {
+			console.error('Error refetching members:', error);
+		}
+	};
+	const handleRemoveMember = async (userId) => {
+		try {
+			const response = await fetch(`http://localhost:8080/api/band/${bandId}/members`);
+			if (response.ok) {
+				const updatedMembers = await response.json();
+				setMembers(updatedMembers);
+			}
+		} catch (error) {
+			console.error('Error refetching members:', error);
+		}
+	};
+	const handleToggleLookingForMembers = async (isChecked) => {
+		const updated = { ...band, needsNewMember: isChecked };
+		const form = new FormData();
+		form.append('band', new Blob([JSON.stringify(updated)], { type: 'application/json' }));
+
+		try {
+			const res = await fetch(`http://localhost:8080/api/band/${band.id}`, {
+				method: 'PUT',
+				headers: { Authorization: user.jwt },
+				body: form,
+			});
+
+			if (res.ok) {
+				const updatedBand = await res.json();
+				setBand(updatedBand);
+			} else {
+				console.error('Failed to update looking for members status');
+			}
+		} catch (error) {
+			console.error('Error updating looking for members status:', error);
+		}
+	};
 	const handleStartEditBio = () => setIsEditingBio(true);
 
 	if (!band) return null;
 
 	const isOwner = user.id === band.ownerId;
 	console.log('Band', band);
+	console.log('Members', members);
 
 	return (
 		<Container maxW='container.md' p={6}>
@@ -214,6 +259,7 @@ export default function BandProfile() {
 				onSaveInfo={handleSaveInfo}
 				onCancelInfo={() => setIsEditingInfo(false)}
 				onMessageUser={handleMessageBandOwner}
+				onToggleLookingForMembers={handleToggleLookingForMembers}
 			/>
 
 			<ProfilePhotoBio
@@ -245,6 +291,7 @@ export default function BandProfile() {
 				onDeleteSong={handleDeleteSong}
 				fileInputRef={fileInputRef}
 				uploaderImage={band.bandImgUrl}
+				loggedInUser={user}
 			/>
 
 			<BandProfileTabs
@@ -258,6 +305,8 @@ export default function BandProfile() {
 				albums={songs}
 				isOwnProfile={isOwner}
 				profileUser={band}
+				onAddMember={handleAddMember}
+				onRemoveMember={handleRemoveMember}
 			/>
 		</Container>
 	);

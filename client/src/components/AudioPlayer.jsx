@@ -11,18 +11,26 @@ import {
 	Avatar,
 	Badge,
 	Menu,
+	Portal,
 } from '@chakra-ui/react';
 import Wavesurfer from '@wavesurfer/react';
 import { FaPlay, FaPause, FaHeart, FaShare, FaEllipsisH, FaTrash } from 'react-icons/fa';
 import { useUser } from '../context/UserContext';
 
-export default function AudioPlayer({ song, uploaderName, onDelete, uploaderImage }) {
-	const { user, fullUser } = useUser();
+export default function AudioPlayer({
+	song,
+	uploaderName,
+	onDelete,
+	uploaderImage,
+	loggedInUser,
+	isOwnProfile = false,
+}) {
+	const { user } = useUser();
 	const [playing, setPlaying] = useState(false);
 	const [liked, setLiked] = useState(false);
 	const wavesurferRef = useRef(null);
 
-	const { id, title, fileUrl, createdAt, albumCoverUrl, userId } = song;
+	const { id, title, fileUrl, createdAt, albumCoverUrl, userId, bandId } = song;
 	const coverSrc =
 		albumCoverUrl ||
 		'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop';
@@ -43,9 +51,22 @@ export default function AudioPlayer({ song, uploaderName, onDelete, uploaderImag
 		}
 	};
 
-	const isOwner = user?.id === userId;
-	// console.log('User from audio', user);
-	// console.log('fulluser from audio', fullUser);
+	// Use the same pattern as PostCard for ownership detection
+	const currentUser = loggedInUser || user;
+	const isOwner = Boolean(
+		// user song authored by me
+		(userId && currentUser?.id === userId) ||
+			// band song on my band's page
+			(bandId && isOwnProfile)
+	);
+
+	// Debug logging
+	console.log('AudioPlayer Debug:');
+	console.log('currentUser?.id:', currentUser?.id, typeof currentUser?.id);
+	console.log('userId:', userId, typeof userId);
+	console.log('bandId:', bandId, typeof bandId);
+	console.log('isOwnProfile:', isOwnProfile);
+	console.log('isOwner:', isOwner);
 
 	return (
 		<Card.Root
@@ -103,20 +124,22 @@ export default function AudioPlayer({ song, uploaderName, onDelete, uploaderImag
 									<FaEllipsisH />
 								</IconButton>
 							</Menu.Trigger>
-							<Menu.Positioner>
-								<Menu.Content>
-									<Menu.Item
-										onClick={() => onDelete(id)}
-										color='red.500'
-										_hover={{ color: 'red.700', bg: 'red.50' }}
-									>
-										<HStack spacing={2}>
-											<FaTrash />
-											<Text>Delete Song</Text>
-										</HStack>
-									</Menu.Item>
-								</Menu.Content>
-							</Menu.Positioner>
+							<Portal>
+								<Menu.Positioner>
+									<Menu.Content>
+										<Menu.Item
+											onClick={() => onDelete(id)}
+											color='red.500'
+											_hover={{ color: 'red.700', bg: 'red.50' }}
+										>
+											<HStack spacing={2}>
+												<FaTrash />
+												<Text>Delete Song</Text>
+											</HStack>
+										</Menu.Item>
+									</Menu.Content>
+								</Menu.Positioner>
+							</Portal>
 						</Menu.Root>
 					)}
 				</Flex>

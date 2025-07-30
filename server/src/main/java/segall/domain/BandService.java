@@ -139,6 +139,8 @@ public class BandService {
         return bandMemberRepository.removeMember(bandId,userId);
     }
 
-
+    public BandMember addBandMember(BandMember bandMember) {
+        return bandMemberRepository.addBandMember(bandMember);
+    }
 
 }

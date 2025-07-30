@@ -51,7 +51,7 @@ Content-Type: application/json
 }
 
 ###
-GET {{url}}/test1@gmail.com
+GET {{url}}/1
 
 ###
 DELETE {{url}}/songs/2

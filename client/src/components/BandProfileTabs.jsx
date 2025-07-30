@@ -1,24 +1,29 @@
-import { Box, VStack, HStack, Text, Avatar, Button } from '@chakra-ui/react';
 import { useState } from 'react';
+import { Box, HStack, VStack, Button, Text } from '@chakra-ui/react';
 import PostsSection from './PostsSection';
 import AudioPlayer from './AudioPlayer';
+import BandMembers from './BandMembers';
 
-const BandProfileTabs = ({
+export default function BandProfileTabs({
 	posts,
 	newPostContent = '',
 	setNewPostContent,
 	onAddPost,
 	onPostDeleted,
 	onPostUpdated,
-	members,
 	albums,
+	members,
 	isOwnProfile = false,
+	onAddMember,
+	onRemoveMember,
 	profileUser,
-}) => {
+	setMembers,
+}) {
 	const [activeTab, setActiveTab] = useState('posts');
 
 	return (
 		<Box mt={6}>
+			{/* Tabs Navigation */}
 			<HStack spacing={4} mb={4} borderBottom='1px solid' borderColor='gray.200' pb={2}>
 				<Button
 					variant={activeTab === 'posts' ? 'solid' : 'ghost'}
@@ -59,35 +64,20 @@ const BandProfileTabs = ({
 				)}
 
 				{activeTab === 'members' && (
-					<VStack spacing={4} align='stretch'>
-						{members && members.length > 0 ? (
-							members.map((m) => (
-								<HStack key={m.userId || m.id} p={4} bg='white' borderRadius='md' boxShadow='sm'>
-									<Avatar name={m.username} src={m.profileImgUrl} />
-									<VStack align='start' spacing={0}>
-										<Text fontWeight='bold'>{m.username}</Text>
-										<Text fontSize='sm' color='gray.500'>
-											{m.role}
-										</Text>
-									</VStack>
-								</HStack>
-							))
-						) : (
-							<Text color='gray.500'>No members yet.</Text>
-						)}
-					</VStack>
+					<BandMembers
+						members={members}
+						isOwnProfile={isOwnProfile}
+						bandId={profileUser.id}
+						onAddMember={onAddMember}
+						onRemoveMember={onRemoveMember}
+					/>
 				)}
 
 				{activeTab === 'discography' && (
 					<VStack spacing={4} align='stretch'>
 						{albums && albums.length > 0 ? (
 							albums.map((song) => (
-								<AudioPlayer
-									key={song.id}
-									song={song}
-									uploaderName={song.uploaderName}
-									onDelete={() => {}}
-								/>
+								<AudioPlayer key={song.id} song={song} uploaderName={song.uploaderName} />
 							))
 						) : (
 							<Text color='gray.500'>No tracks in discography yet.</Text>
@@ -97,6 +87,4 @@ const BandProfileTabs = ({
 			</Box>
 		</Box>
 	);
-};
-
-export default BandProfileTabs;
+}

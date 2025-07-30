@@ -48,6 +48,7 @@ export default function PostsSection({
 							loggedInUser={loggedInUser}
 							onPostDeleted={onPostDeleted}
 							onPostUpdated={onPostUpdated}
+							isOwnProfile={isOwnProfile}
 						/>
 					))}
 				</VStack>
