@@ -286,7 +286,6 @@ export default function PostCard({
 						<Comments
 							post={post}
 							showComments={showComments}
-							loggedInUser={loggedInUser}
 							profileUser={profileUser}
 							onCommentsCountChange={setCommentsCount}
 						/>

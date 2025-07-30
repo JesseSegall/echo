@@ -125,6 +125,26 @@ public class BandController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+   // Need this hack to get to a band profile, we are basically having a user profile act as a band.
+    @GetMapping("/self")
+    public ResponseEntity<List<Band>> getMyBands(@RequestHeader Map<String,String> headers) {
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        List<BandMember> memberships = bandService.findAllMembersByUserId(userId.longValue());
+        // filter owner roles now to see if they are actually a band
+        List<Long> ownedBandIds = memberships.stream()
+                .filter(m -> "owner".equals(m.getRole()))
+                .map(BandMember::getBandId)
+                .toList();
+
+        if (ownedBandIds.isEmpty()) return ResponseEntity.ok(List.of());
+        List<Band> bands = ownedBandIds.stream()
+                .map(bandService::findById)
+                .toList();
+        return ResponseEntity.ok(bands);
+    }
+
 
 
 

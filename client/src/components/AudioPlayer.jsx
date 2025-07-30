@@ -14,8 +14,10 @@ import {
 } from '@chakra-ui/react';
 import Wavesurfer from '@wavesurfer/react';
 import { FaPlay, FaPause, FaHeart, FaShare, FaEllipsisH, FaTrash } from 'react-icons/fa';
+import { useUser } from '../context/UserContext';
 
-export default function AudioPlayer({ song, uploaderName, loggedInUser, onDelete }) {
+export default function AudioPlayer({ song, uploaderName, onDelete, uploaderImage }) {
+	const { user, fullUser } = useUser();
 	const [playing, setPlaying] = useState(false);
 	const [liked, setLiked] = useState(false);
 	const wavesurferRef = useRef(null);
@@ -41,7 +43,9 @@ export default function AudioPlayer({ song, uploaderName, loggedInUser, onDelete
 		}
 	};
 
-	const isOwner = loggedInUser?.id === userId;
+	const isOwner = user?.id === userId;
+	console.log('User from audio', user);
+	console.log('fulluser from audio', fullUser);
 
 	return (
 		<Card.Root
@@ -63,7 +67,7 @@ export default function AudioPlayer({ song, uploaderName, loggedInUser, onDelete
 				{/* Header Section */}
 				<Flex align='center' p={4} pb={3}>
 					<Avatar.Root size='sm' mr={3}>
-						<Avatar.Image src={coverSrc} />
+						<Avatar.Image src={uploaderImage} />
 						<Avatar.Fallback name={uploaderName} />
 					</Avatar.Root>
 					<VStack align='start' spacing={0} flex={1}>

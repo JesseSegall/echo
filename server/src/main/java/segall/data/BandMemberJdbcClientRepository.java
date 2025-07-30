@@ -47,4 +47,10 @@ public class BandMemberJdbcClientRepository implements BandMemberRepository{
         final String sql = "delete from band_members where band_id = ? and user_id = ?";
         return jdbcClient.sql(sql).param(bandId).param(userId).update()>0;
     }
+    @Override
+    public List<BandMember> findAllByUserId(Long userId) {
+        String sql = "select * from band_members where user_id = ?;";
+        return jdbcClient.sql(sql).param(userId).query(BandMember.class).list();
+    }
+
 }

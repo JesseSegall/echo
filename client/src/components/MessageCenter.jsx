@@ -4,12 +4,13 @@ import { Box, HStack, VStack, Text, Flex, Avatar, Textarea, IconButton } from '@
 import { FaPaperPlane, FaArrowLeft } from 'react-icons/fa';
 import ConversationItem from './ConversationItem';
 import MessageBubble from './MessageBubble';
+import { useUser } from '../context/UserContext';
 
-export default function MessageCenter({ loggedInUser }) {
+export default function MessageCenter() {
 	const { conversationId } = useParams();
 	const initialConversationId = conversationId ? Number(conversationId) : null;
 
-	const navigate = useNavigate();
+	const { user: loggedInUser } = useUser();
 
 	const [conversations, setConversations] = useState([]);
 	const [selectedConversation, setSelectedConversation] = useState(null);

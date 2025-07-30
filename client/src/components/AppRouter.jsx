@@ -8,19 +8,19 @@ import NotFound from './NotFound.jsx';
 import MessageCenter from './MessageCenter.jsx';
 import SignUpChoice from './SignUpChoice.jsx';
 import BandSignUpForm from './BandSignUpForm.jsx';
+import BandProfile from './BandProfile';
 
 export default function AppRouter() {
 	const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')));
-	const [fullUser, setFullUser] = useState(null);
 
 	const router = createBrowserRouter([
 		{
 			path: '/',
-			element: <Layout user={user} setUser={setUser} fullUser={fullUser} />,
+			element: <Layout user={user} setUser={setUser} />,
 			children: [
 				{ index: true, element: <div>Welcome to Echo</div> },
 				{ path: 'signup', element: <SignUpChoice /> },
-				{ path: 'login', element: <LoginForm setUser={setUser} setFullUser={setFullUser} /> },
+				{ path: 'login', element: <LoginForm setUser={setUser} /> },
 				{
 					path: 'signup/user',
 					element: <SignUpForm />,
@@ -37,14 +37,14 @@ export default function AppRouter() {
 						<Navigate to='/login' replace />
 					),
 				},
+				{
+					path: 'band/:bandId',
+					element: user ? <BandProfile loggedInUser={user} /> : <Navigate to='/login' replace />,
+				},
 
 				{
 					path: 'profile/:username',
-					element: user ? (
-						<UserProfile user={user} fullUser={fullUser} />
-					) : (
-						<Navigate to='/login' replace />
-					),
+					element: user ? <UserProfile user={user} /> : <Navigate to='/login' replace />,
 				},
 				{
 					path: 'messages',
@@ -54,6 +54,7 @@ export default function AppRouter() {
 					path: 'messages/:conversationId',
 					element: user ? <MessageCenter loggedInUser={user} /> : <Navigate to='/login' replace />,
 				},
+
 				{ path: '*', element: <NotFound /> },
 			],
 		},

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Box, HStack, VStack, Text, Avatar, Textarea, Button } from '@chakra-ui/react';
-
+import { useUser } from '../context/UserContext';
 export default function Comments({
 	post,
 	showComments,
-	loggedInUser,
+
 	profileUser,
 	onCommentsCountChange,
 }) {
+	const { user: loggedInUser, fullUser } = useUser();
 	const [newComment, setNewComment] = useState('');
 	const [comments, setComments] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -101,14 +102,14 @@ export default function Comments({
 			day: 'numeric',
 		});
 	};
-
+	console.log('LoggedInUser Comments:', loggedInUser);
 	return (
 		<Box borderTop='2px solid' borderColor='gray.100' bg='gray.50' p={4}>
 			{/* Add Comment */}
 			<VStack spacing={3} align='stretch'>
 				<HStack spacing={3}>
 					<Avatar.Root size='sm'>
-						<Avatar.Image src={loggedInUser?.profileImgUrl} />
+						<Avatar.Image src={fullUser?.profileImgUrl} />
 						<Avatar.Fallback name={profileUser?.username || 'Current User'} />
 					</Avatar.Root>
 					<Textarea

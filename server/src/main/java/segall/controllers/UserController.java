@@ -120,6 +120,7 @@ public class UserController {
             String jwt = Jwts.builder()
                     .claim("email", result.getpayload().getEmail())
                     .claim("id", result.getpayload().getId())
+                    .claim("username", result.getpayload().getUsername())
                     .signWith(secretSigningKey.getSigningKey())
                     .compact();
             Map<String, String> jwtMap = new HashMap<>();

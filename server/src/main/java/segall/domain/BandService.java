@@ -106,6 +106,10 @@ public class BandService {
     public Band findById(Long bandId){
         return bandRepository.findById(bandId);
     }
+    public List<BandMember> findAllMembersByUserId(Long userId){
+        return bandMemberRepository.findAllByUserId(userId);
+    }
+
 
     public boolean deleteById(Long bandId){
         return bandRepository.deleteById(bandId);
