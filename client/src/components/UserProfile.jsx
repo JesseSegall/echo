@@ -4,7 +4,6 @@ import { Container } from '@chakra-ui/react';
 import { useUser } from '../context/UserContext';
 
 import ProfileHeader from './ProfileHeader';
-import InfoSection from './InfoSection';
 import ProfilePhotoBio from './ProfilePhotoBio';
 import SongsSection from './SongsSection';
 import PostsSection from './PostsSection';
@@ -14,16 +13,13 @@ export default function UserProfile() {
 	const { user, fullUser } = useUser();
 	const navigate = useNavigate();
 
-	// fetched data
 	const [profileUser, setProfileUser] = useState(null);
 	const [songs, setSongs] = useState([]);
 	const [posts, setPosts] = useState([]);
 
-	// file inputs
 	const fileInputRef = useRef();
 	const [selectedFileName, setSelectedFileName] = useState('');
 
-	// edit flags & values
 	const [isEditingProfile, setIsEditingProfile] = useState(false);
 	const [isEditingInfo, setIsEditingInfo] = useState(false);
 	const [infoValues, setInfoValues] = useState({ city: '', state: '', instrument: '' });
@@ -166,21 +162,21 @@ export default function UserProfile() {
 	};
 
 	// delete/update post
-	const handlePostDeleted = (postId) => setPosts((p) => p.filter((x) => x.id !== postId));
+	const handlePostDeleted = (postId) => setPosts((post) => post.filter((x) => x.id !== postId));
 	const handlePostUpdated = (postId, body) =>
-		setPosts((p) => p.map((x) => (x.id === postId ? { ...x, body } : x)));
+		setPosts((post) => post.map((x) => (x.id === postId ? { ...x, body } : x)));
 
 	// message
 	const handleMessageUser = async () => {
-		const r = await fetch(
+		const res = await fetch(
 			`http://localhost:8080/api/messages/conversations/with/${profileUser.id}`,
 			{
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', Authorization: user.jwt },
 			}
 		);
-		if (r.ok) {
-			const convo = await r.json();
+		if (res.ok) {
+			const convo = await res.json();
 			navigate(`/messages?conversationId=${convo.id}`);
 		}
 	};

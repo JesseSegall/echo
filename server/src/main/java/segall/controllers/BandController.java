@@ -15,6 +15,7 @@ import segall.models.BandMember;
 import segall.models.Song;
 import segall.utils.JwtUtil;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +61,11 @@ public class BandController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(band);
+    }
+    @GetMapping("/{bandId}/songs")
+    public ResponseEntity<List<Song>> getBandSongs(@PathVariable Long bandId) {
+        List<Song> songs = songService.getSongsByBandId(bandId);
+        return ResponseEntity.ok(songs);
     }
 
     @PutMapping(value = "/{bandId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -152,7 +158,7 @@ public class BandController {
     public ResponseEntity<Object> addBandSong(
             @PathVariable Long bandId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("albumId") Long albumId,
+            @RequestParam(value = "albumId",required = false) Long albumId,
             @RequestParam("title") String title,
             @RequestHeader Map<String, String> headers
     ) {
@@ -179,13 +185,14 @@ public class BandController {
                     .badRequest()
                     .body(result.getErrorMessages());
         }
+        result.getpayload().setCreatedAt(LocalDateTime.now());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(result.getpayload());
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/songs/{id}")
     public ResponseEntity<Object> getSong(@PathVariable Long id) {
         try {
             Song song = songService.getSongById(id);

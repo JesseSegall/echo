@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class Band {
     private Long id;
+    private Long ownerId;
     private String name;
     private String bandImgUrl;
     private String genre;
@@ -14,6 +15,13 @@ public class Band {
     private boolean needsNewMember;
     private LocalDateTime createdAt;
 
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public Long getId() {
         return id;

@@ -104,7 +104,7 @@ export default function PostCard({
 			console.log('Something went wrong');
 		}
 	};
-
+	const avatarUrl = author.profileImgUrl || author.bandImgUrl;
 	return (
 		<Card.Root
 			overflow='hidden'
@@ -125,7 +125,7 @@ export default function PostCard({
 				{/* Header Section */}
 				<Flex align='center' p={4} pb={3}>
 					<Avatar.Root size='md' mr={3}>
-						<Avatar.Image src={author?.profileImgUrl} />
+						<Avatar.Image src={avatarUrl} />
 						<Avatar.Fallback name={author?.name || author?.username} />
 					</Avatar.Root>
 					<VStack align='start' spacing={0} flex={1}>

@@ -137,7 +137,6 @@ export default function BandSignUpForm() {
 
 	const handleSubmit = async () => {
 		try {
-			// create user first
 			const userRes = await fetch('http://localhost:8080/api/user', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -149,8 +148,8 @@ export default function BandSignUpForm() {
 				return;
 			}
 			const createdUser = await userRes.json();
+			console.log(createdUser);
 
-			//  authenticate to get JWT
 			const authRes = await fetch('http://localhost:8080/api/user/authenticate', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -162,7 +161,6 @@ export default function BandSignUpForm() {
 			}
 			const { jwt } = await authRes.json();
 
-			//  create band with Authorization header so we can pass the user info into the create band method
 			const bandRes = await fetch('http://localhost:8080/api/band', {
 				method: 'POST',
 				headers: {

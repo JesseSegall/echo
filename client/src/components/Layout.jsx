@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
+import { Container } from '@chakra-ui/react';
 import NavBar from './NavBar.jsx';
-
 import { useEffect, useState } from 'react';
 
 const Layout = ({ user, setUser }) => {
@@ -18,12 +18,13 @@ const Layout = ({ user, setUser }) => {
 			setFullUser(null);
 		}
 	}, [user]);
+
 	return (
 		<div>
-			<main>
+			<Container maxW='container.lg' py={6}>
 				<NavBar user={user} setUser={setUser} fullUser={fullUser} />
 				<Outlet />
-			</main>
+			</Container>
 		</div>
 	);
 };

@@ -44,8 +44,8 @@ export default function AudioPlayer({ song, uploaderName, onDelete, uploaderImag
 	};
 
 	const isOwner = user?.id === userId;
-	console.log('User from audio', user);
-	console.log('fulluser from audio', fullUser);
+	// console.log('User from audio', user);
+	// console.log('fulluser from audio', fullUser);
 
 	return (
 		<Card.Root
@@ -188,7 +188,7 @@ export default function AudioPlayer({ song, uploaderName, onDelete, uploaderImag
 					</VStack>
 				</Flex>
 
-				{/* Action Buttons */}
+				{/* Action Buttons which dont do anything yet, may just keep them for looks*/}
 				<Flex
 					px={4}
 					pb={4}

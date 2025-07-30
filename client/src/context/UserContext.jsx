@@ -25,17 +25,17 @@ export function UserProvider({ children }) {
 		fetch(`http://localhost:8080/api/user/profile/${user.username}`, {
 			headers: { Authorization: user.jwt },
 		})
-			.then((r) => r.json())
-			.then((u) => {
-				setFullUser(u);
+			.then((res) => res.json())
+			.then((user) => {
+				setFullUser(user);
 			})
 			.catch(() => setFullUser(null));
 
 		fetch(`http://localhost:8080/api/band/self`, {
 			headers: { Authorization: user.jwt },
 		})
-			.then((r) => (r.ok ? r.json() : []))
-			.then((b) => setBands(b))
+			.then((res) => (res.ok ? res.json() : []))
+			.then((band) => setBands(band))
 			.catch(() => setBands([]));
 	}, [user]);
 

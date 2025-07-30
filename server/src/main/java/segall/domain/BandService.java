@@ -103,8 +103,22 @@ public class BandService {
         return result;
     }
 
-    public Band findById(Long bandId){
-        return bandRepository.findById(bandId);
+    public Band findById(Long bandId) {
+        Band band = bandRepository.findById(bandId);
+        if (band == null) {
+            return null;
+        }
+
+        List<BandMember> members = bandMemberRepository.findAllMembersByBandId(bandId);
+
+        for (BandMember m : members) {
+            if ("owner".equalsIgnoreCase(m.getRole())) {
+                band.setOwnerId(m.getUserId());
+                break;
+            }
+        }
+
+        return band;
     }
     public List<BandMember> findAllMembersByUserId(Long userId){
         return bandMemberRepository.findAllByUserId(userId);
