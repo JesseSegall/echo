@@ -1,7 +1,8 @@
-// src/main/java/segall/controllers/SongController.java
+
 package segall.controllers;
 
 
+import segall.domain.BandService;
 import segall.domain.Result;
 
 
@@ -9,7 +10,14 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import segall.domain.SongService;
+import segall.models.Band;
+import segall.models.BandMember;
 import segall.models.Song;
+import segall.utils.JwtUtil;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/band")
@@ -17,25 +25,26 @@ import segall.models.Song;
 public class BandController {
 
     private final SongService songService;
+    private final BandService bandService;
+    private final JwtUtil jwtUtil;
 
-    public BandController(SongService songService) {
+    public BandController(SongService songService, BandService bandService, JwtUtil jwtUtil) {
         this.songService = songService;
+        this.bandService = bandService;
+        this.jwtUtil = jwtUtil;
     }
 
-
-    // TODO need to make sure only the correct band can upload or delete songs/albums
-    @PostMapping(value="/{bandId}/songs",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> addBandSong(
-            @PathVariable Long bandId,
-            @RequestParam("file")            MultipartFile file,
-            @RequestParam("albumId")         Long albumId,
-            @RequestParam("title")           String title
-
+    @PostMapping
+    public ResponseEntity<Object> createBand(
+            @RequestBody Band band,
+            @RequestHeader Map<String, String> headers
     ) {
-        Result<Song> result = songService.addBandSong(
-                file, bandId, albumId, title
-        );
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        Result<Band> result = bandService.createBand(band, userId.longValue());
         if (!result.isSuccess()) {
             return ResponseEntity
                     .badRequest()
@@ -45,9 +54,225 @@ public class BandController {
                 .status(HttpStatus.CREATED)
                 .body(result.getpayload());
     }
+    @GetMapping("/{bandId}")
+    public ResponseEntity<Object> getBandById(@PathVariable Long bandId) {
+        Band band = bandService.findById(bandId);
+        if (band == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(band);
+    }
+    @GetMapping("/{bandId}/songs")
+    public ResponseEntity<List<Song>> getBandSongs(@PathVariable Long bandId) {
+        List<Song> songs = songService.getSongsByBandId(bandId);
+        return ResponseEntity.ok(songs);
+    }
+
+    @PutMapping(value = "/{bandId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> updateBand(
+            @PathVariable Long bandId,
+            @RequestPart("band") Band band,
+            @RequestPart(value = "photo", required = false) MultipartFile photo,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if (!bandId.equals(band.getId())) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
+        Result<Band> result = bandService.updateBand(band, photo);
+        if (!result.isSuccess()) {
+            return new ResponseEntity<>(result.getErrorMessages(), HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok(result.getpayload());
+    }
+
+    @DeleteMapping("/{bandId}")
+    public ResponseEntity<Object> deleteBand(
+            @PathVariable Long bandId,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        boolean deleted = bandService.deleteById(bandId);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{bandId}/members")
+    public ResponseEntity<Object> getMembers(@PathVariable Long bandId) {
+        List<BandMember> members = bandService.findAllMembersByBandId(bandId);
+        return ResponseEntity.ok(members);
+    }
+
+    @DeleteMapping("/{bandId}/members/self")
+    public ResponseEntity<Object> leaveBand(
+            @PathVariable Long bandId,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer self = jwtUtil.getUserIdFromHeaders(headers);
+        if (self == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        boolean removed = bandService.removeMember(bandId, self.longValue());
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+   // Need this hack to get to a band profile, we are basically having a user profile act as a band.
+    @GetMapping("/self")
+    public ResponseEntity<List<Band>> getMyBands(@RequestHeader Map<String,String> headers) {
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        List<BandMember> memberships = bandService.findAllMembersByUserId(userId.longValue());
+        // filter owner roles now to see if they are actually a band
+        List<Long> ownedBandIds = memberships.stream()
+                .filter(m -> "owner".equals(m.getRole()))
+                .map(BandMember::getBandId)
+                .toList();
+
+        if (ownedBandIds.isEmpty()) return ResponseEntity.ok(List.of());
+        List<Band> bands = ownedBandIds.stream()
+                .map(bandService::findById)
+                .toList();
+        return ResponseEntity.ok(bands);
+    }
+
+    @PostMapping("/{bandId}/members")
+    public ResponseEntity<Object> addBandMember(
+            @PathVariable Long bandId,
+            @RequestBody Map<String, Long> request,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userIdToAdd = request.get("userId");
+        if (userIdToAdd == null) {
+            return ResponseEntity.badRequest().body("User ID is required");
+        }
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(userIdFromHeaders.longValue()) && "owner".equals(m.getRole()));
+
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only add members to your own band");
+        }
+
+        boolean isAlreadyMember = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m -> m.getUserId().equals(userIdToAdd));
+
+        if (isAlreadyMember) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User is already a member of this band");
+        }
+
+        BandMember newMember = new BandMember();
+        newMember.setBandId(bandId);
+        newMember.setUserId(userIdToAdd);
+        newMember.setRole("member");
 
 
-    @GetMapping("/{id}")
+        BandMember addedMember = bandService.addBandMember(newMember);
+
+        if (addedMember != null) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(addedMember);
+        } else {
+            return ResponseEntity.badRequest().body("Failed to add member");
+        }
+    }
+
+    @DeleteMapping("/{bandId}/members/{userId}")
+    public ResponseEntity<Object> removeBandMember(
+            @PathVariable Long bandId,
+            @PathVariable Long userId,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(userIdFromHeaders.longValue()) && "owner".equals(m.getRole()));
+
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only remove members from your own band");
+        }
+
+
+        boolean removed = bandService.removeMember(bandId, userId);
+
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found in this band");
+        }
+    }
+
+
+    @PostMapping(value = "/{bandId}/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> addBandSong(
+            @PathVariable Long bandId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "albumId",required = false) Long albumId,
+            @RequestParam("title") String title,
+            @RequestHeader Map<String, String> headers
+    ) {
+
+        Integer idFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (idFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(idFromHeaders.longValue()) && "owner".equals(m.getRole()));
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
+        Result<Song> result = songService.addBandSong(file, bandId, albumId, title);
+        if (!result.isSuccess()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(result.getErrorMessages());
+        }
+        result.getpayload().setCreatedAt(LocalDateTime.now());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(result.getpayload());
+    }
+
+
+    @GetMapping("/songs/{id}")
     public ResponseEntity<Object> getSong(@PathVariable Long id) {
         try {
             Song song = songService.getSongById(id);
@@ -56,6 +281,38 @@ public class BandController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{bandId}/songs/{songId}")
+    public ResponseEntity<Object> deleteBandSong(
+            @PathVariable Long bandId,
+            @PathVariable Long songId,
+            @RequestHeader Map<String, String> headers
+    ) {
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if (userIdFromHeaders == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        boolean isOwner = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m ->
+                        m.getUserId().equals(userIdFromHeaders.longValue()) && "owner".equals(m.getRole()));
+
+        if (!isOwner) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
+        boolean deleted = songService.deleteById(songId).isSuccess();
+
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 

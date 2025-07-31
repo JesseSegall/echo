@@ -166,6 +166,11 @@ INSERT INTO band (name, genre, city, state) VALUES
 ('Jazz Collective', 'Jazz', 'Chicago', 'IL'),
 ('Electronic Vibes', 'Electronic', 'Austin', 'TX');
 
+INSERT INTO `band_members` (band_id, user_id, role) VALUES
+  (6, 1, 'member'),
+  (6, 2, 'member'),
+  (6, 3, 'member');
+
 
 
 
@@ -175,3 +180,5 @@ SELECT * FROM songs;
 select * from comments;
 select * from messages;
 select * from conversations;
+select * from band;
+select * from band_members;

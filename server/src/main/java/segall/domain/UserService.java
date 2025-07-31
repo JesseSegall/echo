@@ -13,11 +13,12 @@ import segall.models.User;
 import segall.storage.StorageService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 @Service
 public class UserService {
-    UserRepository repository;
-    StorageService storageService;
+    private final UserRepository repository;
+    private final StorageService storageService;
 
     public UserService(UserRepository repository, StorageService storageService) {
         this.repository = repository;
@@ -113,6 +114,9 @@ public class UserService {
 
     public User findById(Long userId){
         return repository.findById(userId);
+    }
+    public List<User> searchUsers(String query, Long excludeUserId) {
+        return repository.searchUsers(query, excludeUserId);
     }
 
 }

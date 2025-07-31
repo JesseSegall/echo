@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import segall.data.mappers.UserMapper;
 import segall.models.User;
 
+import java.util.List;
 import java.util.Objects;
 
 @Repository
@@ -74,6 +75,30 @@ public class UserJdbcClientRepository implements UserRepository{
     public User findById(Long userId) {
         final String sql = "select * from `user` where id = ?";
         return jdbcClient.sql(sql).param(userId).query(User.class).optional().orElse(null);
+    }
+
+    @Override
+    public List<User> searchUsers(String query, Long excludeUserId) {
+        final String sql = """
+            SELECT DISTINCT u.* FROM `user` u
+            WHERE (u.username LIKE :query OR u.first_name LIKE :query OR u.last_name LIKE :query OR u.email LIKE :query)
+            AND u.id != :excludeUserId
+            AND u.id NOT IN (
+                SELECT bm.user_id 
+                FROM band_members bm 
+                WHERE bm.role = 'owner'
+            )
+            ORDER BY u.username 
+            LIMIT 20
+            """;
+
+        String searchPattern = "%" + query + "%";
+
+        return jdbcClient.sql(sql)
+                .param("query", searchPattern)
+                .param("excludeUserId", excludeUserId != null ? excludeUserId : 0L)
+                .query(User.class)
+                .list();
     }
 
     @Override

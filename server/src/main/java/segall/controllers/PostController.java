@@ -5,6 +5,7 @@ package segall.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import segall.domain.BandService;
 import segall.domain.PostService;
 import segall.domain.Result;
 import segall.models.Post;
@@ -18,12 +19,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
+    BandService bandService;
     PostService service;
     JwtUtil jwtUtil;
 
-    public PostController(PostService service, JwtUtil jwtUtil) {
+    public PostController(PostService service, JwtUtil jwtUtil, BandService bandService) {
         this.service = service;
         this.jwtUtil = jwtUtil;
+        this.bandService = bandService;
     }
 
     @PostMapping("/user/{userId}")
@@ -101,6 +104,41 @@ public class PostController {
             return new ResponseEntity<>(result.getpayload(), HttpStatus.OK);
         }
         return new ResponseEntity<>(result.getErrorMessages(), HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/band/{bandId}")
+    public ResponseEntity<Object> createBandPost(@PathVariable Long bandId, @RequestBody Post post,
+                                                 @RequestHeader Map<String, String> headers){
+        Integer userIdFromHeaders = jwtUtil.getUserIdFromHeaders(headers);
+        if(userIdFromHeaders == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        boolean isMember = bandService
+                .findAllMembersByBandId(bandId)
+                .stream()
+                .anyMatch(m -> m.getUserId().equals(userIdFromHeaders.longValue()));
+
+        if (!isMember) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        post.setCreatedAt(LocalDateTime.now());
+        post.setBandId(bandId);
+        post.setUserId(null);
+
+        Result<Post> result = service.addPost(post);
+        if(result.isSuccess()){
+            return ResponseEntity.status(HttpStatus.CREATED).body(result.getpayload());
+        }
+        return ResponseEntity.badRequest().body(result.getErrorMessages());
+    }
+
+    @GetMapping("/band/{bandId}")
+    public ResponseEntity<Object> getAllPostsByBandId(@PathVariable Long bandId){
+        List<Post> posts = service.getPostsByBandId(bandId);
+        return ResponseEntity.ok(posts);
     }
 
 

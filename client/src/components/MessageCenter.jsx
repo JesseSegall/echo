@@ -4,13 +4,14 @@ import { Box, HStack, VStack, Text, Flex, Avatar, Textarea, IconButton } from '@
 import { FaPaperPlane, FaArrowLeft } from 'react-icons/fa';
 import ConversationItem from './ConversationItem';
 import MessageBubble from './MessageBubble';
+import { useUser } from '../context/UserContext';
 
-export default function MessageCenter({ loggedInUser }) {
+export default function MessageCenter() {
 	const { conversationId } = useParams();
 	const initialConversationId = conversationId ? Number(conversationId) : null;
 
-	const navigate = useNavigate();
-
+	const { user: loggedInUser, bands, activeEntity } = useUser();
+	console.log('Bands:', bands);
 	const [conversations, setConversations] = useState([]);
 	const [selectedConversation, setSelectedConversation] = useState(null);
 	const [messages, setMessages] = useState([]);
@@ -127,9 +128,10 @@ export default function MessageCenter({ loggedInUser }) {
 			console.error('Error deleting conversation:', error);
 		}
 	};
-	console.log('Selected Conversation', selectedConversation);
-	console.log('Logged in User message center', loggedInUser);
-
+	const ownProfileImage =
+		activeEntity?.kind === 'band'
+			? bands.find((b) => b.id === activeEntity.id)?.bandImgUrl
+			: loggedInUser.profileImgUrl;
 	return (
 		<Flex h='80vh' bg='white' borderRadius='lg' overflow='hidden' boxShadow='lg'>
 			{/* Left Sidebar - Conversations */}
@@ -198,6 +200,7 @@ export default function MessageCenter({ loggedInUser }) {
 										key={msg.id}
 										message={msg}
 										isOwnMessage={msg.senderId === loggedInUser.id}
+										ownProfileImage={ownProfileImage}
 									/>
 								))
 							) : (

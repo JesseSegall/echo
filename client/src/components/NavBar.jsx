@@ -1,15 +1,25 @@
-import { Box, Flex, Heading, Button, Spacer } from '@chakra-ui/react';
+import { Box, Flex, Heading, Button, Spacer, SkeletonCircle, Avatar } from '@chakra-ui/react';
 import { NavLink } from 'react-router-dom';
-import { Avatar, IconButton } from '@chakra-ui/react';
 import { FaEnvelope } from 'react-icons/fa';
+import { useUser } from '../context/UserContext';
 
-function NavBar({ user, setUser, fullUser }) {
+export default function NavBar() {
+	const { user, setUser, fullUser, bands } = useUser();
+
+	const ownBand = bands && bands.length > 0 ? bands[0] : null;
+
+	const avatarSrc = ownBand ? ownBand.bandImgUrl : fullUser?.profileImgUrl;
+	const avatarName = ownBand ? ownBand.name : fullUser?.username;
+
+	const profilePath = ownBand ? `/band/${ownBand.id}` : `/profile/${fullUser?.username}`;
+
 	return (
 		<Box bg='blue.500' shadow='md' px={4} borderRadius='md' color='white'>
 			<Flex h={16} alignItems='center'>
 				<Heading size='md'>Echo Music</Heading>
 				<Spacer />
-				{!user && (
+
+				{!user ? (
 					<>
 						<Button as={NavLink} to='/signup' variant='outline' colorScheme='white' mr={3}>
 							Sign Up
@@ -18,21 +28,17 @@ function NavBar({ user, setUser, fullUser }) {
 							Login
 						</Button>
 					</>
-				)}
-				{user && (
+				) : (
 					<>
-						{fullUser && (
-							<Avatar.Root
-								mr={3}
-								as={NavLink}
-								to={`/profile/${fullUser.username}`}
-								size='md'
-								className='avatar'
-							>
-								<Avatar.Fallback name={fullUser.username} />
-								<Avatar.Image src={fullUser.profileImgUrl} />
+						{fullUser ? (
+							<Avatar.Root as={NavLink} to={profilePath} size='md' mr={3}>
+								<Avatar.Fallback name={avatarName} />
+								<Avatar.Image src={avatarSrc} />
 							</Avatar.Root>
+						) : (
+							<SkeletonCircle size='40px' mr={3} />
 						)}
+
 						<Button
 							as={NavLink}
 							to='/messages'
@@ -45,6 +51,7 @@ function NavBar({ user, setUser, fullUser }) {
 						>
 							<FaEnvelope />
 						</Button>
+
 						<Button
 							as={NavLink}
 							to='/'
@@ -63,5 +70,3 @@ function NavBar({ user, setUser, fullUser }) {
 		</Box>
 	);
 }
-
-export default NavBar;

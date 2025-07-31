@@ -71,4 +71,7 @@ public class PostService {
     public List<Post> getPostsByUserId(Long userId){
         return repository.getPostsByUserId(userId);
     }
+    public List<Post> getPostsByBandId(Long bandId){
+        return repository.getPostsByBandId(bandId);
+    }
 }

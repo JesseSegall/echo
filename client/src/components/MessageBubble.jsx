@@ -1,6 +1,6 @@
 import { Box, HStack, VStack, Text, Avatar } from '@chakra-ui/react';
 
-export default function MessageBubble({ message, isOwnMessage }) {
+export default function MessageBubble({ message, isOwnMessage, ownProfileImage }) {
 	const getTimeAgo = (dateString) => {
 		const now = new Date();
 		const messageDate = new Date(dateString);
@@ -20,7 +20,6 @@ export default function MessageBubble({ message, isOwnMessage }) {
 			minute: '2-digit',
 		});
 	};
-	console.log('Message from message bubble', message);
 
 	return (
 		<HStack justify={isOwnMessage ? 'flex-end' : 'flex-start'} align='start' spacing={2} mb={3}>
@@ -48,7 +47,7 @@ export default function MessageBubble({ message, isOwnMessage }) {
 			</VStack>
 			{isOwnMessage && (
 				<Avatar.Root size='sm'>
-					<Avatar.Image src={message.senderImage} />
+					<Avatar.Image src={ownProfileImage} />
 					<Avatar.Fallback name={message.senderName || 'You'} />
 				</Avatar.Root>
 			)}
