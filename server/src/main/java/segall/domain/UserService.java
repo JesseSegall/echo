@@ -119,4 +119,8 @@ public class UserService {
         return repository.searchUsers(query, excludeUserId);
     }
 
+    public List<User> getAllUsers(){
+        return repository.getAllUsers();
+    }
+
 }

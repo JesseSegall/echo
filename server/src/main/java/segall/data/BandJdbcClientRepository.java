@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import segall.models.Band;
 
+import java.util.List;
 import java.util.Objects;
 
 @Repository
@@ -74,6 +75,14 @@ public class BandJdbcClientRepository implements BandRepository{
                 .param("needs_new_member", band.getNeedsNewMember())
                 .param("id", band.getId())
                 .update()>0;
+    }
+
+    @Override
+    public List<Band> getAllBands() {
+        final String sql = """
+                select * from band;
+                """;
+        return jdbcClient.sql(sql).query(Band.class).list();
     }
 
     @Override

@@ -11,4 +11,5 @@ public interface UserRepository {
     User findById(Long userId);
     List<User> searchUsers(String query, Long excludeUserId);
     boolean updateUser(User user);
+    List<User> getAllUsers();
 }

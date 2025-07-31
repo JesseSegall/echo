@@ -283,6 +283,16 @@ public class BandController {
                     .body(e.getMessage());
         }
     }
+    @GetMapping
+    public ResponseEntity<List<Band>> getAllBands(@RequestHeader Map<String, String> headers) {
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<Band> bands = bandService.getAllBands();
+        return ResponseEntity.ok(bands);
+    }
 
     @DeleteMapping("/{bandId}/songs/{songId}")
     public ResponseEntity<Object> deleteBandSong(
