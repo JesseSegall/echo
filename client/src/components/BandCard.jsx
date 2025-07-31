@@ -36,7 +36,7 @@ export default function BandCard({ band }) {
 						)}
 						{band.needsNewMember && (
 							<Badge colorPalette='green' variant='subtle' borderRadius='full' px={3} py={1}>
-								Recruiting
+								Looking for New Members!
 							</Badge>
 						)}
 					</HStack>
