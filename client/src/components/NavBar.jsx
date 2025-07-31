@@ -53,13 +53,12 @@ export default function NavBar() {
 						</Button>
 
 						<Button
-							as={NavLink}
-							to='/'
 							variant='outline'
 							colorScheme='white'
 							onClick={() => {
 								setUser(null);
 								localStorage.removeItem('user');
+								navigate('/');
 							}}
 						>
 							Logout

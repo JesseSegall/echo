@@ -169,6 +169,16 @@ public class UserController {
         List<User> users = service.searchUsers(query.trim(), userIdFromHeaders.longValue());
         return ResponseEntity.ok(users);
     }
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers(@RequestHeader Map<String, String> headers) {
+        Integer userId = jwtUtil.getUserIdFromHeaders(headers);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<User> users = service.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
 
     @PutMapping( "/{id}")
     public ResponseEntity<Object> update(

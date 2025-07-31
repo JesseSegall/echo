@@ -10,6 +10,7 @@ import UserProfile from './components/UserProfile.jsx';
 import BandProfile from './components/BandProfile.jsx';
 import MessageCenter from './components/MessageCenter.jsx';
 import NotFound from './components/NotFound.jsx';
+import Home from './components/Home.jsx';
 
 import { useUser } from './context/UserContext.jsx';
 
@@ -20,7 +21,7 @@ function AppRoutes() {
 		{
 			element: <Layout />,
 			children: [
-				{ index: true, element: <div>Welcome to Echo Music</div> },
+				{ index: true, element: <Home /> },
 
 				{ path: 'signup', element: <SignUpChoice /> },
 				{ path: 'signup/user', element: <SignUpForm /> },

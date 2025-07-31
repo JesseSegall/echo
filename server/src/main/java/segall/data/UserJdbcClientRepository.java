@@ -135,5 +135,13 @@ public class UserJdbcClientRepository implements UserRepository{
 
 
     }
+
+    @Override
+    public List<User> getAllUsers() {
+        final String sql = """
+                select * from user;
+                """;
+        return jdbcClient.sql(sql).query(User.class).list();
+    }
     // TODO: Add delete user
 }

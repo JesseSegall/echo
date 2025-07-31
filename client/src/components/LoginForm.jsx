@@ -38,11 +38,7 @@ export default function LoginForm() {
 		const myBands = bandRes.ok ? await bandRes.json() : [];
 		setBands(myBands);
 
-		if (myBands.length > 0) {
-			navigate(`/band/${myBands[0].id}`);
-		} else {
-			navigate(`/profile/${decoded.username}`);
-		}
+		navigate('/');
 	};
 
 	return (

@@ -142,5 +142,8 @@ public class BandService {
     public BandMember addBandMember(BandMember bandMember) {
         return bandMemberRepository.addBandMember(bandMember);
     }
+    public List<Band> getAllBands(){
+        return bandRepository.getAllBands();
+    }
 
 }
